@@ -1,0 +1,39 @@
+# Final System: IPRoute2
+# This section is done in Chroot environment
+
+# Apply fixes from Alpine Linux
+sed -i '/^TARGETS=/s: arpd : :' misc/Makefile
+sed -i 's:/usr/local:/usr:' tc/m_ipt.c include/iptables.h
+sed -i -e 's:=/share:=/usr/share:' -e 's:-Werror::' Makefile
+
+# The arpd program included in this package will not be built since 
+# it is dependent on Berkeley DB, which is not installed in Optimux
+sed -i /ARPD/d Makefile
+rm -fv man/man8/arpd.8
+
+# Disable building two modules that require iptables
+sed -i 's/.m_ipt.o//' tc/Makefile
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -Os -fdata-sections -ffat-lto-objects "
+export CFLAGS+="-ffunction-sections -flto=4 -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+
+# Configure
+CFLAGS="-D_GNU_SOURCE $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --mandir=/usr/share/man \
+            --localstatedir=/var \
+            --build=x86_64-linux-musl
+
+# BUILD
+make CCOPTS="-D_GNU_SOURCE $CFLAGS"
+
+# Install
+make SBINDIR=/usr/sbin install
+
+unset CFLAGS LDFLAGS 

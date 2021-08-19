@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Auke Kok <auke-jan.h.kok@intel.com>
+Date: Mon, 2 Apr 2018 16:29:23 -0700
+Subject: [PATCH] Recommend 1M topology size if none set.
+
+---
+ libblkid/src/topology/topology.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libblkid/src/topology/topology.c b/libblkid/src/topology/topology.c
+index 53007d1..df7295a 100644
+--- a/libblkid/src/topology/topology.c
++++ b/libblkid/src/topology/topology.c
+@@ -342,6 +342,8 @@ unsigned long blkid_topology_get_minimum_io_size(blkid_topology tp)
+  */
+ unsigned long blkid_topology_get_optimal_io_size(blkid_topology tp)
+ {
++	if (tp->optimal_io_size == 0)
++		return 1024 * 1024;
+ 	return tp->optimal_io_size;
+ }
+ 

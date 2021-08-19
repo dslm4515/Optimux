@@ -1,0 +1,29 @@
+# Tool Chain: Musl
+# Build and install as oml
+
+# Optimize build with some flags. Musl libc cannot be built with LTO
+export  CFLAGS="-march=native -pipe -O3 -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure 
+CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" \
+./configure \
+  CROSS_COMPILE=${OML_TARGET}- \
+  --prefix=/ \
+  --target=${OML_TARGET}
+
+# Build and install 
+make && make DESTDIR=/tools install
+
+# Fix Link
+rm -v  /tools/lib/ld-musl-x86_64.so.1
+ln -sv libc.so /tools/lib/ld-musl-x86_64.so.1
+
+# Create dynamic linker config
+mkdir -pv /tools/etc &&
+cat > /tools/etc/ld-musl-x86_64.path << "EOF"
+/tools/lib
+EOF
+
+unset CFLAGS CXXFLAGS LDFLAGS

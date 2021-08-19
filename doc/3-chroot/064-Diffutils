@@ -1,0 +1,19 @@
+# Final System: Diffutils
+# This section is done in Chroot environment
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-fno-lto -O3 -fno-semantic-interposition "
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+./configure --prefix=/usr --build=x86_64-linux-musl
+
+# Compile
+make
+
+# Install
+make install
+
+unset CFLAGS

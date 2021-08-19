@@ -1,0 +1,34 @@
+# Final System: Kmod
+# This section is done in Chroot environment
+
+# Optimize without LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-Os -fdata-sections -ffunction-sections "
+export CFLAGS+="-fno-lto -fno-semantic-interposition "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+./configure --prefix=/usr          \
+            --bindir=/bin          \
+            --sysconfdir=/etc      \
+            --with-rootlibdir=/lib \
+            --with-xz              \
+            --with-zlib \
+            --with-zstd \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+# Create symlinks for compatibility with Module-Init-Tools,
+# formerly handled by Linux kernel modules
+for target in depmod insmod modinfo modprobe rmmod; do
+  ln -sfv ../bin/kmod /sbin/$target
+done
+
+ln -sfv kmod /bin/lsmod
+
+unset CFLAGS

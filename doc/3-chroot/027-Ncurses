@@ -1,0 +1,79 @@
+# Final System: Ncurses
+# This section is done in Chroot environment
+
+
+sed -i '/LIBTOOL_INSTALL/d' c++/Makefile.in
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -Os -fdata-sections -ffunction-sections "
+export CFLAGS+="-fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source for non-wide
+mkdir build && cd build 
+
+AR=gcc-ar \
+RANLIB=gcc-ranlib \
+NM=gcc-nm \
+CFLAGS="-flto -ffat-lto-objects $CFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+../configure --prefix=/usr           \
+             --with-pkg-config-libdir=/usr/lib/pkgconfig \
+             --build=x86_64-linux-musl \
+             --with-shared \
+             --with-termlib \
+             --with-progs \
+             --enable-pc-files \
+             --with-abi-version=6 \
+             --with-cxx-shared \
+             --enable-const \
+             --enable-ext-colors \
+             --with-versioned-syms \
+             --disable-static 
+
+# Build non-wide
+make 
+
+# Configure source for wide
+mkdir ../build-wide && cd ../build-wide
+AR=gcc-ar \
+RANLIB=gcc-ranlib \
+NM=gcc-nm \
+CFLAGS="-flto -ffat-lto-objects $CFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+../configure --prefix=/usr \
+             --with-pkg-config-libdir=/usr/lib/pkgconfig \
+             --build=x86_64-linux-musl \
+             --with-shared \
+             --with-termlib \
+             --enable-widec \
+             --enable-pc-files \
+             --with-abi-version=6 \
+             --with-cxx-shared \
+             --enable-const \
+             --enable-ext-colors \
+             --with-versioned-syms \
+             --disable-static 
+
+# Build wide
+make
+
+# Install both wide & non-wide libraries
+cd ..
+make -C build install
+make _C build-wide install
+
+# Move misplaced libraries
+mv -v /usr/lib/libncursesw.so.6* /lib
+mv -v /usr/lib/libncurses.so.6*  /lib
+
+# Relink
+rm -v /usr/lib/libcurses.so
+ln -sv ../../lib/libncurses.so.6.2 /usr/lib/libcurses.so
+rm -v /usr/lib/libncurses.so
+ln -sv ../../lib/libncurses.so.6.2 /usr/lib/libncurses.so
+rm -v /usr/lib/libncursesw.so
+ln -sv ../../lib/libncursesw.so.6.2 /usr/lib/libncursesw.so
+
+unset CFLAGS LDFLAGS

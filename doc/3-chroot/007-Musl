@@ -1,0 +1,67 @@
+# Final System: Musl
+# This section is done in Chroot environment
+
+# Fix paths for utmp & wtmp:
+patch -Np1 -i ../patches/musl-mlfs/fix-utmp-wtmp-paths.patch
+
+# Fix rounding issue for 32-bit x86
+case $(uname -m) in
+   i686) patch -Np1 -i ../patches/musl-mlfs/i686-fix-rounding.patch ;;
+esac &&
+
+# Apply fixes from Alpine Linux
+patch -Np1 -i ../patches/musl-alpine/0001-riscv64-define-ELF_NFPREG.patch
+patch -Np1 -i ../patches/musl-alpine/handle-aux-at_base.patch
+patch -Np1 -i ../patches/musl-alpine/syscall-cp-epoll.patch
+
+# Optimize build
+# - libc.so runs slower if built with -O3, according to some 
+# - LTO breaks binaries... builds, but crt files missing symbols
+export  CFLAGS="-march=native -pipe -O2 -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export LDFLAGS="-Wl,-u,_dlstart_c -Wl,-u,__dls2 -Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+LDFLAGS="$LDFLAGS -Wl,-soname,libc.musl-x86_64.so.1" \
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --localstatedir=/var \
+            --disable-gcc-wrapper
+
+# Build
+make 
+
+# Install
+make install
+
+# clear LDFLAGS, as special link flags no longer needed for rest of the build
+unset LDFLAGS
+
+# build libssp
+/tools/bin/$(uname -m)-optimux-*-gcc -fpie $CFLAGS -c \
+../files/musl-alpine/__stack_chk_fail_local.c -o __stack_chk_fail_local.o &&
+/tools/bin/$(uname -m)-optimux-*-gcc-ar r \
+libssp_nonshared.a __stack_chk_fail_local.o                               
+
+# Install libssp 
+install -v -D -m755 libssp_nonshared.a /usr/lib/
+
+# Create a link for ldd
+ln -sv ../usr/lib/libc.so /bin/ldd
+
+# Define search paths for shared libraries
+cat > /etc/ld-musl-x86_64.path << "EOF"
+/lib
+/usr/local/lib
+/usr/lib
+EOF
+
+# Install ldconfig script, as musl libc does not come with one:
+install -v -D -m755 ../files/musl-adelie/ldconfig /usr/bin/ 
+
+# As of musl v1.2.2, header is needed by util-linux
+rm -v ${BUILD}/usr/include/utmpx.h 
+
+# Clean up 
+unset CFLAGS

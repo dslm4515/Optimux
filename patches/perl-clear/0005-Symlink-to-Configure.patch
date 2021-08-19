@@ -1,0 +1,21 @@
+From c99e93ba0de11c5d895608426e4d22ed3cd9f084 Mon Sep 17 00:00:00 2001
+From: Auke Kok <auke-jan.h.kok@intel.com>
+Date: Mon, 18 Nov 2019 10:52:11 -0800
+Subject: [PATCH] Symlink to Configure.
+
+---
+ configure | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 120000 configure
+
+diff --git a/configure b/configure
+new file mode 120000
+index 0000000..448fb1f
+--- /dev/null
++++ b/configure
+@@ -0,0 +1 @@
++Configure
+\ No newline at end of file
+-- 
+2.24.0
+

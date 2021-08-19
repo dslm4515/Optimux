@@ -1,0 +1,156 @@
+# Tool Chain: GCC
+# Build and install as oml
+
+# Optimize build with some flags.
+#export   CFLAGS="-march=native -pipe -fno-semantic-interposition "
+#export  CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export  CFLAGS+="-fzero-call-used-regs=used"
+#export CFLAGS="-march=native -pipe -fno-semantic-interposition "
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Additional sources to add as GCC requires them 
+xz -cd ../pkgs/mpfr-4.1.0.tar.xz | tar -xf -
+mv -v mpfr-4.1.0 mpfr
+xz -cd ../pkgs/gmp-6.2.1.tar.xz | tar -xf -
+mv -v gmp-6.2.1 gmp
+gunzip -cd ../pkgs/mpc-1.2.1.tar.gz | tar -xf -
+mv -v mpc-1.2.1 mpc
+tar xf ../pkgs/isl-0.23.tar.bz2
+mv -v isl-0.23 isl
+
+# The target build is finding the host libstdc++'s <fenv.h>, fix it
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100017#c7
+patch -Np1 -i ../patches/gcc-mlfs-11.2.0/fix_fenv_header.patch
+
+# Apply patches for MUSL support
+for p in 0001-posix_memalign \
+  0002-gcc-poison-system-directories \
+  0003-Turn-on-Wl-z-relro-z-now-by-default  \
+  0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O \
+  0006-Enable-Wformat-and-Wformat-security-by-default \
+  0007-Enable-Wtrampolines-by-default \
+  0009-Ensure-that-msgfmt-doesn-t-encounter-problems-during \
+  0010-Don-t-declare-asprintf-if-defined-as-a-macro \
+  0011-libiberty-copy-PIC-objects-during-build-process \
+  0012-libitm-disable-FORTIFY \
+  0013-libgcc_s \
+  0014-nopie \
+  0015-libffi-use-__linux__-instead-of-__gnu_linux__-for-mu \
+  0016-dlang-update-zlib-binding \
+  0017-dlang-fix-fcntl-on-mips-add-libucontext-dep \
+  0018-ada-fix-shared-linking \
+  0019-build-fix-CXXFLAGS_FOR_BUILD-passing \
+  0020-add-fortify-headers-paths \
+  0023-Pure-64-bit-MIPS \
+  0024-use-pure-64-bit-configuration-where-appropriate \
+  0025-always-build-libgcc_eh.a \
+  0027-ada-musl-support-fixes \
+  0028-gcc-go-Use-_off_t-type-instead-of-_loff_t \
+  0029-gcc-go-Don-t-include-sys-user.h \
+  0030-gcc-go-Fix-ucontext_t-on-PPC64 \
+  0031-gcc-go-Fix-handling-of-signal-34-on-musl \
+  0032-gcc-go-Use-int64-type-as-offset-argument-for-mmap \
+  0034-gcc-go-signal-34-is-special-on-musl-libc \
+  0035-gcc-go-Prefer-_off_t-over-_off64_t \
+  0036-gcc-go-undef-SETCONTEXT_CLOBBERS_TLS-in-proc.c \
+  0037-gcc-go-link-to-libucontext \
+  0038-gcc-go-Disable-printing-of-unaccessible-ppc64-struct \
+  0041-Use-generic-errstr.go-implementation-on-musl \
+  0042-Disable-ssp-on-nostdlib-nodefaultlibs-and-ffreestand \
+  0043-configure-Add-enable-autolink-libatomic-use-in-LINK_ \
+  0044-DP-Use-push-state-pop-state-for-gold-as-well-when-li
+do
+  patch -Np1 -i ../patches/gcc-alpine/$p.patch
+done
+
+for p in 0001-posix_memalign 0003-Turn-on-Wl-z-relro-z-now-by-default \
+         0007-Enable-Wtrampolines-by-default 0013-libgcc_s 0014-nopie \
+         0024-use-pure-64-bit-configuration-where-appropriate
+do
+#  patch -Np1 -i ../patches/gcc-alpine/$p.patch
+done
+
+# Re-create internal header
+cat gcc/{limitx,glimits,limity}.h > \
+  $(dirname $($OML_TARGET-gcc -print-libgcc-file-name))/include-fixed/limits.h
+
+## Change the location of GCC's default dynamic linker to use the one installed in /tools
+#
+# For i686/x86_64:
+for file in gcc/config/{linux,i386/linux{,64}}.h
+do
+  cp -uv $file{,.orig}
+  sed -e 's/\/lib\(64\)\?\(32\)\?\/ld/\/tools&/g' \
+      -e 's/\/usr/\/tools/g' ${file}.orig > ${file}
+  echo '
+#undef STANDARD_STARTFILE_PREFIX_1
+#undef STANDARD_STARTFILE_PREFIX_2
+#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"
+#define STANDARD_STARTFILE_PREFIX_2 ""' >> ${file}
+  touch ${file}.orig
+done
+
+# Build in dedicated build directory
+mkdir -v build && cd build
+
+# Disable some features
+export  OFFF="--disable-libstdcxx-pch "
+export OFFF+="--disable-multilib "
+export OFFF+="--disable-bootstrap " 
+export OFFF+="--disable-libgomp "
+export OFFF+="--disable-libquadmath " 
+export OFFF+="--disable-libssp "
+export OFFF+="--disable-libvtv "
+export OFFF+="--disable-symvers "
+export OFFF+="--disable-libitm "
+export OFFF+="--disable-libsanitizer " 
+
+# Enable graphite
+export GON="--with-ppl --with-cloog "
+
+# Enable LTO
+export XTRA="--enable-lto "
+
+# Configure source
+#CFLAGS="-g0 -O0 $CFLAGS" \
+#CXXFLAGS="-g0 -O0 CFLAGS" \
+CFLAGS="-g0 -O0 " \
+CXXFLAGS="-g0 -O0 " \
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+../configure                                       \
+    --target=${OML_TARGET}                        \
+    --build=${OML_HOST}                           \
+    --host=${OML_TARGET}                          \
+    --prefix=/tools                                \
+    --with-local-prefix=/tools                     \
+    --with-native-system-header-dir=/tools/include \
+    --enable-languages=c,c++ \
+    --with-pkgversion="Optimux-Tools 1.0.0" $OFFF $XTRA $GON
+
+# Compile
+PATH=/bin:/usr/bin:/cross-tools/bin:/tools/bin make
+
+# Install
+make install
+
+# Per LFS book explanation:
+# Many programs and scripts run cc instead of gcc, which is used 
+# to keep programs generic and therefore usable on all kinds 
+# of UNIX systems where the GNU C compiler is not always 
+# installed. Running cc leaves the system administrator free 
+# to decide which C compiler to install. Create a link:
+ln -sv gcc /tools/bin/cc
+
+# Test toolchain
+echo 'int main(){}' > dummy.c &&
+gcc dummy.c
+readelf -l a.out | grep ': /tools'
+rm -v dummy.c a.out
+
+unset CFLAGS CXXFLAGS LDFLAGS OFFF XTRA GON

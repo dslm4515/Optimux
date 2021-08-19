@@ -1,0 +1,28 @@
+# Final System: Libffi
+# This section is done in Chroot environment
+
+# Apply patches from Void Linux
+patch -Np0 -i ../patches/libffi-void/libffi-race-condition.patch &&
+patch -Np0 -i ../patches/libffi-void/no-toolexeclibdir.patch 
+
+# Optimize without LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-O3 -falign-functions=32 -fno-lto -fno-math-errno "
+export CFLAGS+="-fno-semantic-interposition -fno-trapping-math "
+
+# Configure
+CFLAGS="$CFLAGS" \
+./configure --prefix=/usr    \
+            --disable-static \
+            --includedir=/usr/include    \
+            --disable-multi-os-directory \
+            --with-pic --with-gcc-arch=native \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS

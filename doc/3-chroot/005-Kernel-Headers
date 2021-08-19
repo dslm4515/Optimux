@@ -1,0 +1,17 @@
+# Final System: Kernel Headers
+# This section is done in Chroot environment
+
+# Kernel version greater than 5.9.16 will not compile under musl 
+patch -Np1 -i ../patches/kernel/include-uapi-linux-swab-Fix-potentially-missing-__always_inline.patch
+
+# Clean sources
+make mrproper
+
+# Build Headers
+make headers   
+
+# Install
+cp -rv usr/include/* /usr/include
+
+# Remove unneeded MakeFile
+rm -v /usr/include/Makefile

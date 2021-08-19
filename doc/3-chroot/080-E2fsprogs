@@ -1,0 +1,50 @@
+# Final System: E2fsprogs
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -Os -fdata-sections -ffat-lto-objects "
+export CFLAGS+="-ffunction-sections -flto=auto -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Build in dedicated directory
+mkdir -v build && cd build
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=auto $LDFLAGS" \
+../configure --prefix=/usr           \
+             --bindir=/bin           \
+             --with-root-prefix=""   \
+             --enable-elf-shlibs     \
+             --disable-libblkid      \
+             --disable-libuuid       \
+             --disable-uuidd         \
+             --disable-fsck \
+             --enable-e2initrd-helper \
+             --disable-rpath \
+             --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+make install-libs
+
+# Fix permissions to strip off debugging symbols later
+chmod -v u+w /usr/lib/{libcom_err,libe2p,libext2fs,libss}.a 
+
+# Source package installs a gzipped .info file but doesn't 
+# update the system-wide dir file. Unzip this file and then 
+# update the system dir file using the following commands: 
+gunzip -v /usr/share/info/libext2fs.info.gz
+install-info --dir-file=/usr/share/info/dir /usr/share/info/libext2fs.info
+
+# Optionally, install some additional documentation:
+makeinfo -o      doc/com_err.info ../lib/et/com_err.texinfo
+install -v -m644 doc/com_err.info /usr/share/info
+install-info --dir-file=/usr/share/info/dir /usr/share/info/com_err.info
+
+unset CFLAGS LDFLAGS

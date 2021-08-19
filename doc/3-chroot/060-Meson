@@ -1,0 +1,23 @@
+# Final System: Meson
+# This section is done in Chroot environment
+#
+# Meson is technically optional as no packages in
+# an Optimux build will need meson. But meson is a popular
+# enough that there are several packages in BMLFS that
+# use the meson build system.
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-flto=4 -Wl,-O2 -Wl,--as-needed "
+
+# Configure & build
+CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" python3 setup.py build
+
+# Install
+python3 setup.py install --root=dest &&
+cp -rv dest/* /
+
+unset CFLAGS LDFLAGS
+
+

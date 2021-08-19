@@ -1,0 +1,34 @@
+# Final System: Man-db
+# This section is done in Chroot environment
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-fno-lto -fstack-protector-strong -fzero-call-used-regs=used "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+./configure --prefix=/usr                        \
+            --docdir=/usr/share/doc/man-db-2.9.4 \
+            --sysconfdir=/etc                    \
+            --disable-setuid                     \
+            --enable-cache-owner=bin             \
+            --with-browser=/usr/bin/lynx         \
+            --with-vgrind=/usr/bin/vgrind        \
+            --with-grap=/usr/bin/grap            \
+            --with-systemdtmpfilesdir=           \
+            --with-systemdsystemunitdir=         \
+            --with-pager=less                    \
+            --disable-rpath                      \
+            --enable-threads=posix               \
+            --without-included-regex             \
+            --enable-automatic-create \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS

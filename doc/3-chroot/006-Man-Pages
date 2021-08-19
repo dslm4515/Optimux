@@ -1,0 +1,4 @@
+# Final System: Man pages
+# This section is done in Chroot environment
+
+make prefix=/usr install

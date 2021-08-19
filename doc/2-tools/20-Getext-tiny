@@ -1,0 +1,10 @@
+# Tool Chain: Gettext-Tiny
+# Build and install as oml
+
+# Build
+CC="${OML_TARGET}-gcc" \
+AR="${OML_TARGET}-ar" \
+RANLIB="${OML_TARGET}-ranlib" make LIBINTL=MUSL prefix=/tools
+
+# Install only what is needed
+cp -v msgfmt msgmerge xgettext /tools/bin

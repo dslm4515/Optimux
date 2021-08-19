@@ -1,0 +1,26 @@
+# Final System: Flex
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure
+CFLAGS="$CFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+ac_cv_func_malloc_0_nonnull=yes  \
+ac_cv_func_realloc_0_nonnull=yes \
+HELP2MAN=/tools/bin/true         \
+./configure --prefix=/usr \
+            --docdir=/usr/share/doc/flex-2.6.4 \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+ln -sv flex /usr/bin/lex
+
+unset CFLAGS LDFLAGS

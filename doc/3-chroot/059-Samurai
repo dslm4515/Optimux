@@ -1,0 +1,11 @@
+# Final System: Samurai
+# This section is done in Chroot environment
+
+# Build 
+CC=gcc CFLAGS="-march=native -mtune=native -O3 -pipe " make PREFIX=/usr
+
+# Install
+make PREFIX=/usr install
+
+# In case ninja is invoked
+ln -sv samu /usr/bin/ninja

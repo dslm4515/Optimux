@@ -1,0 +1,61 @@
+# Final System: Util-Linux
+# This section is done in Chroot environment
+
+# Apply patches from Clear Linux for these fixes:
+# * Speed-up-agetty-waits
+# * Recommend-1M-topology-size-if-none-set
+# * rim-all-filesystems-not-just-fstab-ones
+#patch -Np1 -i ../patches/util-linux-clear/0001-Speed-up-agetty-waits.patch
+patch -Np1 -i ../patches/util-linux-clear/0002-Recommend-1M-topology-size-if-none-set.patch 
+patch -Np1 -i ../patches/util-linux-clear/0003-Trim-all-filesystems-not-just-fstab-ones.patch 
+# First patch causes an error:
+# /usr/bin/ld: /tmp/cccpComo.ltrans0.ltrans.o: in function `do_prompt':
+#<artificial>:(.text.do_prompt+0x2d5): undefined reference to `malloc_trim'
+#collect2: error: ld returned 1 exit status
+#make[2]: *** [Makefile:7263: agetty] Error 1
+
+
+# Apply patch from Void Linux for musl support
+patch -Np0 -i ../patches/util-linux-void/fix-musl.patch
+
+# Add missing header from Adelie Linux
+cp -v ../files/util-linux-adelie/ttydefaults.h include/
+
+# Update configure system
+libtoolize --force && aclocal -I m4 && autoconf -v && \
+automake --add-missing && NOCONFIGURE=1 ./autogen.sh
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe -D_DIRENT_HAVE_D_TYPE "
+export CFLAGS+="-O3 -Os -fdata-sections -ffat-lto-objects "
+export CFLAGS+="-ffunction-sections -flto=auto -fno-semantic-interposition "
+export CFLAGS+="-fstack-protector-strong -fzero-call-used-regs=used "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS"   \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=auto $LDFLAGS" \
+LIBS="-lutmps -lskarnet"                              \
+./configure ADJTIME_PATH=/var/lib/hwclock/adjtime     \
+            --docdir=/usr/share/doc/util-linux-2.37.1 \
+            --disable-chfn-chsh  \
+            --disable-login      \
+            --disable-nologin    \
+            --disable-su         \
+            --disable-setpriv    \
+            --disable-runuser    \
+            --disable-pylibmount \
+            --disable-static     \
+            --without-python     \
+            --without-systemd    \
+            --without-systemdsystemunitdir \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS

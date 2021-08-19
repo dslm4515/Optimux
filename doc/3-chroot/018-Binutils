@@ -1,0 +1,63 @@
+# Final System: binutils
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fstack-protector-strong "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Apply patches
+patch -Np1 -i ../patches/binutils-alpine/binutils-ld-fix-static-linking.patch
+patch -Np1 -i ../patches/binutils-alpine/binutils-mips-disable-assert.patch
+patch -Np1 -i ../patches/binutils-alpine/gold-mips.patch
+patch -Np1 -i ../patches/binutils-alpine/ld-bfd-mips.patch
+
+# Build in dedicated directory
+mkdir build && cd build
+
+# Enable LTO and gold linker
+export XTRA="--enable-lto --enable-gold "
+
+# Configure source
+CFLAGS="-flto=auto $CFLAGS" \
+CXXFLAGS="-flto=auto $CFLAGS" \
+LDFLAGS="-flto=auto $LDFLAGS" \
+../configure --prefix=/usr       \
+             --enable-ld=default \
+             --enable-plugins    \
+             --enable-shared     \
+             --disable-werror    \
+             --with-system-zlib  \
+             --enable-relro \
+             --disable-nls \
+             --enable-deterministic-archives \
+             --enable-default-hash-style=gnu \
+             --enable-threads \
+             --disable-multilib \
+             --disable-compressed-debug-sections \
+             --with-mmap \
+             --enable-targets=x86_64-pep \
+             --enable-64-bit-bfd \
+             --build=x86_64-linux-musl $XTRA
+
+# Build
+make tooldir=/usr 
+
+# Install
+make tooldir=/usr install
+
+# Install headers
+install -v -m 644 ../include/libiberty.h /usr/include &&
+install -v -m 644 ../include/demangle.h  /usr/include
+
+# make gold linker the default linker
+rm -v /usr/bin/ld
+ln -sv ld.gold /usr/bin/ld
+
+# Remove useless man pages
+for f in dlltool nlmconv windres windmc; do
+ rm -fv /usr/share/man/man1/${f}.1
+done
+
+unset CFLAGS CXXFLAGS LDFLAGS XTRA

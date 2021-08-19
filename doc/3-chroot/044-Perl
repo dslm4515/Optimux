@@ -1,0 +1,96 @@
+# Final System: Perl
+# This section is done in Chroot environment
+
+# Apply patches from Alpine Linux
+patch -Np1 -i ../patches/perl-alpine/musl-locale.patch
+patch -Np1 -i ../patches/perl-alpine/musl-skip-dst-test.patch
+patch -Np1 -i ../patches/perl-alpine/musl-stack-size.patch
+
+# Apply patch: Add option for pgo profiling test with perlbench
+patch -Np1 -i ../patches/perl-clear/0001-Add-option-for-pgo-profiling-test-with-perlbench.patch
+
+# Apply patch: Add perlbench for pgo optimization
+patch -Np1 -i ../patches/perl-clear/0001-Add-perlbench-for-pgo-optimization.patch
+
+# Apply patch: Symlink to Configure
+patch -Np1 -i ../patches/perl-clear/0005-Symlink-to-Configure.patch
+
+# Apply patch: Ignore unknown options in configure
+patch -Np1 -i ../patches/perl-clear/0006-Ignore-unknown-options-in-configure.patch 
+
+# Apply patch: replace clean with distclean
+patch -Np1 -i ../patches/perl-clear/0007-replace-clean-with-distclean.patch
+
+# The Compress::Raw::Zlib module will not compile with zlib-ng.
+# use the bundled copy of zlib. But use the system install bzip2
+# for the Compress::Raw::BZip2 module.
+export BUILD_ZLIB=True
+export BUILD_BZIP2=0
+
+# Optimize build with LTO & PGO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-ffat-lto-objects -flto=4 "
+export LDFLAGS="-flto=4 -Wl,-O2 -Wl,--as-needed "
+
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
+export  CFLAGS_GENERATE="$CFLAGS -fprofile-generate "
+export CFLAGS_GENERATE+="-fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export  FCFLAGS_GENERATE="$FCFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export FCFLAGS_GENERATE+="-fprofile-update=atomic "
+export  FFLAGS_GENERATE="$FFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export FFLAGS_GENERATE+="-fprofile-update=atomic "
+export CXXFLAGS_GENERATE="$CXXFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export CXXFLAGS_GENERATE+="-fprofile-update=atomic "
+export  LDFLAGS_GENERATE="$LDFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export LDFLAGS_GENERATE+="-fprofile-update=atomic "
+export CFLAGS_USE="$CFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FCFLAGS_USE="$FCFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FFLAGS_USE="$FFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export CXXFLAGS_USE="$CXXFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export LDFLAGS_USE="$LDFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+
+# Add optimizing flags
+export  OPT1="-O3 -ffunction-sections -fno-semantic-interposition -fopt-info-vec "
+export OPT1+="-ffat-lto-objects -flto=4 -fprofile-dir=/var/tmp/pgo "
+export OPT2="$(echo $LDFLAGS | grep -q fprofile.generate && echo "-fprofile-generate" || echo "-fprofile-use -fprofile-correction")"
+
+# Configure source
+CFLAGS="${CFLAGS_USE}" \
+CXXFLAGS="${CXXFLAGS_USE}" \
+FFLAGS="${FFLAGS_USE}" \
+FCFLAGS="${FCFLAGS_USE}" \
+LDFLAGS="${LDFLAGS_USE}" \
+sh Configure -des                                         \
+             -Dprefix=/usr                                \
+             -Dvendorprefix=/usr                          \
+             -Dprivlib=/usr/lib/perl5/5.34/core_perl      \
+             -Darchlib=/usr/lib/perl5/5.34/core_perl      \
+             -Dsitelib=/usr/lib/perl5/5.34/site_perl      \
+             -Dsitearch=/usr/lib/perl5/5.34/site_perl     \
+             -Dvendorlib=/usr/lib/perl5/5.34/vendor_perl  \
+             -Dvendorarch=/usr/lib/perl5/5.34/vendor_perl \
+             -Dman1dir=/usr/share/man/man1                \
+             -Dman3dir=/usr/share/man/man3                \
+             -Dpager="/usr/bin/less -isR"                 \
+             -Duseshrplib                                 \
+             -Dusethreads \
+             -Adefine:d_procselfexe \
+             -Adefine:procselfexe='"/proc/self/exe"' \
+             -Adefine:optimize="$OPT1" \
+             -Aappend:optimize="$OPT2"  \
+             -Adefine:ccflags="$CFLAGS" \
+             -Adefine:ldflags="$LDFLAGS" \
+             -Adefine:lddflags="$LDFLAGS"
+
+# Compile
+make 
+
+# Install
+make install
+
+# Clean up
+unset CFLAGS CXXFLAGS LDFLAGS FFLAGS FCFLAGS CXXFLAGS_GENERATE FFLAGS_GENERATE
+unset LDFLAGS_GENERATE FCFLAGS_GENERATE CXXFLAGS_USE FFLAGS_USE FCFLAGS_USE
+unset CFLAGS_GENERATE CFLAGS_USE LDFLAGS_USE BUILD_ZLIB BUILD_BZIP2 OPT1 OPT2

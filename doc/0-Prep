@@ -1,0 +1,73 @@
+# Final System can be built in a directory and later copied to a partition.
+# If building on a seperate partition, create the file system and mount it.
+# Set #OML to the mount point. Example:
+# Perform as root:
+mkfs.etx4 /dev/sdXY
+mkdir -pv /mnt/oml
+mount /dev/sdXY /mnt/oml
+export OML=/mnt/oml
+
+# Create directories to build tools and link them to host's root directory:
+mkdir -v $OML/cross-tools
+mkdir -v $OML/tools
+ln -sv   $OML/cross-tools /
+ln -sv   $OML/tools /
+
+# Create directories to hold patches, files, packages, and build area:
+mkdir -pv $OML/sources/{patches,files,pkgs,scripts}
+
+# Download sources + patches
+#  Use the list in sources folder with wget to download sources. Some sources 
+#  may not download or are hard to find. Copy such sources from included 
+#  sources folder.
+# 
+# Source directory should have this structure:
+#  source
+#  |
+#  +-scripts
+#  +-patches
+#  +-files
+#  +-pkgs
+#
+
+# Create user and group
+# Change ownership to allow installation of tools
+groupadd oml
+useradd -s /bin/bash -g oml -m -k /dev/null oml
+passwd oml
+
+chown -v  oml  $OML/cross-tools
+chown -vR oml  $OML/sources
+chmod -v  a+wt $OML/sources
+chown -v  oml  $OML/tools
+
+# Now run as oml user. All toolchain software should be built as this user, unless specified.
+su - oml
+
+# Set up the environment.
+cat > ~/.bash_profile << "EOF"
+exec env -i HOME=$HOME TERM=$TERM PS1='\u:\w\n\$ ' /bin/bash
+EOF
+
+cat > ~/.bashrc << "EOF"
+set +h
+umask 022
+OML=/mnt/oml
+LC_ALL=POSIX
+PATH=/cross-tools/bin:/tools/bin:/bin:/usr/bin
+export OML LC_ALL PATH
+EOF
+
+# Build Variables
+# *Will add more after first build on AMD64/x86_64
+
+export OML_HOST="$(echo $MACHTYPE | \
+    sed "s/$(echo $MACHTYPE | cut -d- -f2)/cross/")"
+
+cat >> ~/.bashrc << EOF
+export OML_HOST="${OML_HOST}"
+export OML_TARGET="x86_64-optimux-linux-musl"
+export OML_ARCH="x86"
+export OML_CPU="x86-64"
+EOF
+source ~/.bashrc

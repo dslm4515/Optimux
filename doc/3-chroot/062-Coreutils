@@ -1,0 +1,36 @@
+# Final System: Coreutils
+# This section is done in Chroot environment
+
+# Apply patch from Alpine Linux
+patch -Np1 -i ../patches/coreutils-alpine/ls.patch
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -Os -fdata-sections -ffat-lto-objects -flto=4 "
+export CFLAGS+="-ffunction-sections -fno-semantic-interposition "
+export CFLAGS+="-fstack-protector-strong -fzero-call-used-regs=used "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure
+CFLAGS="-I/usr/include/utmps $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+LIBS="-lutmps -lskarnet -lrt" \
+FORCE_UNSAFE_CONFIGURE=1 \
+./configure --prefix=/usr                           \
+            --enable-no-install-program=kill,uptime \
+            --disable-rpath                         \
+            --enable-install-program=arch,hostname \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+# Move programs to the locations specified by the FHS: 
+mv -v /usr/bin/chroot /usr/sbin
+mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8
+
+unset CFLAGS LDFLAGS

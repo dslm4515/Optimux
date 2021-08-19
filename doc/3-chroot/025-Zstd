@@ -1,0 +1,44 @@
+# Final System: Zstandard
+# This section is done in Chroot environment
+
+# Optimize build with LTO & PGO - Not sure if all are even used in the build
+export CFLAGS="-march=native -mtune=native -pipe "
+export  CFLAGS="$CFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 "
+export CFLAGS+="-fno-math-errno -fno-semantic-interposition -fno-trapping-math "
+export LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed "
+export  FCFLAGS="$FFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno "
+export FCFLAGS+="-fno-semantic-interposition -fno-trapping-math "
+export  FFLAGS="$FFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno "
+export FFLAGS+="-fno-semantic-interposition -fno-trapping-math "
+export  CXXFLAGS="$CXXFLAGS -O3 -falign-functions=32 -ffat-lto-objects -flto=4 -fno-math-errno "
+export CXXFLAGS+="-fno-semantic-interposition -fno-trapping-math "
+export CFLAGS_GENERATE="$CFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export FCFLAGS_GENERATE="$FCFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export FFLAGS_GENERATE="$FFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export CXXFLAGS_GENERATE="$CXXFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export LDFLAGS_GENERATE="$LDFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic "
+export CFLAGS_USE="$CFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FCFLAGS_USE="$FCFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FFLAGS_USE="$FFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export CXXFLAGS_USE="$CXXFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export LDFLAGS_USE="$LDFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+
+# Build
+CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" make
+CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" make -C contrib/pzstd
+
+# Install
+CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" make prefix=/usr install
+CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" LDFLAGS="$LDFLAGS" make prefix=/usr -C contrib/pzstd install
+
+# Remove static lib
+rm -v /usr/lib/libzstd.a
+
+# Move misplaced libraries
+mv -v /usr/lib/libzstd.so.* /lib          
+ln -sfv ../../lib/libzstd.so.1.5.0  /usr/lib/libzstd.so 
+
+# Clean up
+unset CFLAGS CXXFLAGS LDFLAGS FFLAGS FCFLAGS CXXFLAGS_GENERATE FFLAGS_GENERATE
+unset LDFLAGS_GENERATE FCFLAGS_GENERATE CXXFLAGS_USE FFLAGS_USE FCFLAGS_USE
+unset CFLAGS_GENERATE CFLAGS_USE LDFLAGS_USE

@@ -1,0 +1,20 @@
+# Final System: Less
+# This section is done in Chroot environment
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native -pipe -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+
+# Configure
+CFLAGS="$CFLAGS" \
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS

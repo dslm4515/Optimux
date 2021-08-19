@@ -1,0 +1,28 @@
+# Tool Chain: Vim
+# Build and install as oml
+
+# Configure source -- complains libncurses.so/libncursesw.so is not usable
+#CC="${OML_TARGET}-gcc" \
+#CXX="${OML_TARGET}-g++" \
+#AR="${OML_TARGET}-ar" \
+#AS="${OML_TARGET}-as" \
+#RANLIB="${OML_TARGET}-ranlib" \
+#LD="${OML_TARGET}-ld" \
+#STRIP="${OML_TARGET}-strip" \
+#LDFLAGS="-L/tools/lib" \
+#CPPFLAGS="-I/tools/include" \
+#./configure --build=${OML_HOST} \
+#            --host=${OML_TARGET} \
+#            --prefix=/tools \
+#            --without-x
+
+# Configure and use gcc in /tools
+LDFLAGS="-L/tools/lib" \
+CPPFLAGS="-I/tools/include" \
+./configure --prefix=/tools --without-x
+
+# Build and install to toolchain
+make && make install
+
+# Some users use vim as vi
+ln -sv vim /tools/bin/vi

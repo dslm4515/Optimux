@@ -1,0 +1,27 @@
+# Final System: Findutils
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --localstatedir=/var/lib/locate \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+# The updatedb script also needs to be modified to 
+# correct an explicit path
+sed -i 's|find:=${BINDIR}|find:=/bin|' /usr/bin/updatedb
+
+unset CFLAGS LDFLAGS

@@ -1,0 +1,33 @@
+# Final System: Cpio
+# This section is done in Chroot environment
+
+# Apply patch from Alpine Linux to remove 
+# superfluous declaration of program_name
+patch -Np1 -i ../patches/cpio-alpine/gcc-10.patch
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -falign-functions=32 -ffat-lto-objects -flto=4 "
+export CFLAGS+="-fno-math-errno -fno-semantic-interposition "
+export CFLAGS+="-fno-trapping-math -fstack-protector-strong -fzero-call-used-regs=used "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Update build system
+autoreconf -ifv
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --bindir=/bin \
+            --enable-mt   \
+            --with-rmt=/usr/libexec/rmt \
+            --build=x86_64-linux-musl
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS

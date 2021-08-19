@@ -1,0 +1,40 @@
+# Final System: utmps
+# This section is done in Chroot environment
+
+# Optimize build
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Set pkconfig file
+cp -v ../files/utmps-alpine/*.pc /tmp/            &&
+sed -i -e "s/@@VERSION@@/0.1.0.2/g" -- /tmp/*.pc  &&
+
+# Configure
+CFLAGS="-flto $CFLAGS"   \
+CXXFLAGS="-flto $CFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+./configure --enable-shared      \
+            --enable-static      \
+            --enable-allstatic   \
+            --enable-static-libc \
+            --libdir=/usr/lib    \
+            --with-dynlib=/lib   \
+            --libexecdir="/lib/utmps" \
+            --with=dynlib=/lib \ 
+            --build=x86_64-linux-musl
+
+# Compile
+make
+
+# Install
+make install
+install -v -D -m644 /tmp/utmps.pc /usr/lib/pkgconfig/
+
+# Some packages will look for utmpx.h in /usr/include
+ln -sv utmps/utmpx.h ${BUILD}/usr/include/utmpx.h
+
+# Clean up
+unset CFLAGS CXXFLAGS LDFLAGS
+rm -v /tmp/utmps.pc

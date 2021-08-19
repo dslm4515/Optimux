@@ -1,0 +1,38 @@
+# Tool Chain: Coreutils
+# Build and install as oml
+
+# Re-create configure script
+autoreconf -vif
+
+patch -Np1 -i ../patches/coreutils-alpine/ls.patch
+
+# Cross Compiling the configure script 
+# does not does not determine the correct 
+# values for the following, Set the values 
+# manually: 
+cat > config.cache << EOF
+fu_cv_sys_stat_statfs2_bsize=no
+ac_cv_func_syncfs=no
+gl_cv_func_working_mkstemp=yes
+gl_cv_func_working_acl_get_file=yes
+EOF
+
+# Suppress a test which on some machines can loop forever:
+sed -i '/test.lock/s/^/#/' gnulib-tests/gnulib.mk
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools \
+            --enable-install-program=hostname \
+            --cache-file=config.cache
+
+# Build and install to toolchain
+make && make install

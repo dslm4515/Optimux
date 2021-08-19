@@ -1,0 +1,38 @@
+# Tool Chain: bash
+# Build and install as oml
+
+# Cross Compiling the configure script 
+# does not does not determine the correct 
+# values for the following, Set the values 
+# manually: 
+cat > config.cache << "EOF"
+ac_cv_func_mmap_fixed_mapped=yes
+ac_cv_func_strcoll_works=yes
+ac_cv_func_working_mktime=yes
+bash_cv_func_sigsetjmp=present
+bash_cv_getcwd_malloc=yes
+bash_cv_job_control_missing=present
+bash_cv_printf_a_format=yes
+bash_cv_sys_named_pipes=present
+bash_cv_ulimit_maxfds=yes
+bash_cv_under_sys_siglist=yes
+bash_cv_unusable_rtsigs=no
+gt_cv_int_divbyzero_sigfpe=yes
+EOF
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools \
+            --without-bash-malloc \
+            --cache-file=config.cache
+
+# Build and install to toolchain
+make && make install

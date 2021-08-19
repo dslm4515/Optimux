@@ -1,0 +1,39 @@
+# Final System: GRUB
+# This section is done in Chroot environment
+
+# Apply patches from Alpine Linux
+patch -Np1 -i ../patches/grub-alpine/lang-C.UTF-8.patch         && \
+patch -Np1 -i ../patches/grub-alpine/fix-gcc-no-pie-specs.patch && \
+patch -Np1 -i ../patches/grub-alpine/alpine-mkconfig.patch
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -g -fopt-info-vec -fno-lto "
+
+# Regenerate/update configure script
+PYTHON=python3 ./autogen.sh
+
+# For x86 BIOS-based hardware:
+export XTRA_CONF="--with-platform=pc"
+
+# For x86 UEFI-based hardware:
+export XTRA_CONF="--with-platform=efi --disable-efiemu --target=x86_64 "
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+./configure --prefix=/usr          \
+            --sbindir=/sbin        \
+            --sysconfdir=/etc      \
+            --disable-nls          \
+            --disable-werror ${XTRA_CONF}
+
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS
+
+

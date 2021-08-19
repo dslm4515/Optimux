@@ -1,0 +1,24 @@
+# Cross-tools: File
+# Build and install as oml
+
+#export  CFLAGS="-march=native -pipe -O3 -fno-semantic-interposition "
+#export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source with freshly built GCC
+#CFLAGS="-flto $CFLAGS" \
+#CXXFLAGS="-flto $CFLAGS" \
+#LDFLAGS="-flto $LDFLAGS" \
+CC="${OML_TARGET}-gcc"         \
+CXX="${OML_TARGET}-g++"        \
+AR="${OML_TARGET}-ar"          \
+AS="${OML_TARGET}-as"          \
+RANLIB="${OML_TARGET}-ranlib"  \
+LD="${OML_TARGET}-ld"          \
+STRIP="${OML_TARGET}-strip"    \
+./configure --prefix=/cross-tools --disable-libseccomp
+
+# Build and install
+make && make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

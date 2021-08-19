@@ -1,0 +1,29 @@
+# Final System: Readline
+# This section is done in Chroot environment
+
+# Optimize build without LTO, per Clear Linux
+export  CFLAGS="-march=native -mtune=native -Os -pipe -fno-semantic-interposition "
+export CFLAGS+="-fdata-sections -ffunction-sections -fstack-protector-strong "
+export CFLAGS+="-fzero-call-used-regs=used "
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="-fno-lto $CFLAGS" \
+CXXFLAGS="-fno-lto $CFLAGS" \
+./configure --prefix=/usr    \
+            --disable-static \
+            --docdir=/usr/share/doc/readline-8.1 \
+            --build=x86_64-linux-musl
+
+# Build
+make SHLIB_LIBS="-L/tools/lib -lncursesw" 
+
+# Install
+make SHLIB_LIBS="-L/tools/lib -lncursesw" install
+
+# Fix links
+mv -v /usr/lib/lib{readline,history}.so.* /lib/ &&
+ln -sfv ../../lib/libreadline.so.8.1 /usr/lib/libreadline.so &&
+ln -sfv ../../lib/libhistory.so.8.1  /usr/lib/libhistory.so
+
+unset CFLAGS CXXFLAGS LDFLAGS

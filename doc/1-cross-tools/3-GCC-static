@@ -1,0 +1,64 @@
+# Cross-Tools: GCC STATIC
+# Build and install as oml
+
+# GCC now requires the GMP, MPFR and MPC packages to build.
+# Unpack them in-tree.
+xz -cd ../pkgs/mpfr-4.1.0.tar.xz | tar -xf -
+mv -v mpfr-4.1.0 mpfr
+xz -cd ../pkgs/gmp-6.2.1.tar.xz | tar -xf -
+mv -v gmp-6.2.1 gmp
+gunzip -cd ../pkgs/mpc-1.2.1.tar.gz | tar -xf -
+mv -v mpc-1.2.1 mpc
+tar xf ../pkgs/isl-0.23.tar.bz2
+mv -v isl-0.23 isl
+
+# The GCC documentation recommends building GCC in 
+# a dedicated build directory
+mkdir -v build && cd  build
+
+# Disable features
+export  OFFF="--disable-nls --disable-libvtv --disable-decimal-float "
+export OFFF+="--disable-libitm --disable-shared "
+export OFFF+="--disable-libssp --disable-multilib "
+export OFFF+="--disable-libgomp --disable-libstdcxx "
+export OFFF+="--disable-threads --disable-libquadmath "
+export OFFF+="--disable-libatomic --disable-libsanitizer"
+
+# Set the build
+export  BCONF="--build=${OML_HOST} "
+export BCONF+="--host=${OML_HOST} "
+export BCONF+="--target=${OML_TARGET} "
+export BCONF+="--with-arch=${OML_CPU} "
+
+#export  CFLAGS="-march=native -pipe -fno-semantic-interposition "
+#export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Enable LTO
+export  XTRA="--enable-lto "
+#export XTRA+="--with-plugin-ld=/cross-tools/x86_64-optimux-linux-musl/bin/ld "
+
+# Enable graphite
+export GON="--with-ppl --with-cloog "
+
+# Configure source 
+#LDFLAGS="$LDFLAGS" \
+#CFLAGS="$CFLAGS -g0 -O0" \
+#CXXFLAGS="$CFLAGS -g0 -O0" \
+CFLAGS="-g0 -O0" \
+CXXFLAGS="-g0 -O0" \
+../configure ${BCONF} \
+          --prefix=/cross-tools \
+          --with-sysroot=/cross-tools/${OML_TARGET} \
+          --with-newlib  \
+          --without-headers \
+          --enable-languages=c \
+          --enable-clocale=generic \
+          --with-pkgversion="OML-CT 1.0.0 Static" ${OFFF} ${XTRA} ${GON}
+
+# Build only the mininum 
+make all-gcc all-target-libgcc
+
+# Install
+make install-gcc install-target-libgcc
+unset BCONF OFFF XTRA GON CFLAGS CXXFLAGS LDFLAGS

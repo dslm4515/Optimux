@@ -1,0 +1,39 @@
+# Final System: Time zone Utilities and Data
+# This section is done in Chroot environment
+
+# Optimize build
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Set the timezones
+export timezones="africa antarctica asia australasia europe northamerica \
+                  southamerica etcetera backward factory"
+
+# Create a build directory and unpack
+mkdir tzdb && cd tzdb &&
+tar xf ../pkgs/tzdata2021a.tar.gz &&
+tar xf ../pkgs/tzcode2021a.tar.gz &&
+tar xf ../pkgs/posixtz-0.5.tar.xz
+
+# Apply patch from Adelie Linux
+patch -Np1 -i ../patches/posixtz-adelie/0001-posixtz-fix-up-lseek.patch &&
+
+# Build
+make CFLAGS="$CFLAGS -DHAVE_STDINT_H=1" TZDIR="/usr/share/zoneinfo" &&
+make CFLAGS="$CFLAGS" -C posixtz-0.5 posixtz
+
+# Install
+mkdir -pv /usr/share/zoneinfo/right &&
+mkdir -pv /usr/sbin                 &&
+mkdir -pv /usr/share/man/man8       &&
+install -m444 -t /usr/share/zoneinfo iso3166.tab zone1970.tab zone.tab
+install -m755 zic zdump /usr/sbin
+install -m644 zic.8 zdump.8 /usr/share/man/man8
+install -v -Dm755 posixtz-0.5/posixtz /usr/bin/posixtz
+./zic -b fat -y ./yearistype -d /usr/share/zoneinfo ${timezones}
+./zic -b fat -y ./yearistype -d /usr/share/zoneinfo/right -L leapseconds ${timezones}
+./zic -b fat -y ./yearistype -d /usr/share/zoneinfo -p America/New_York
+
+unset timezones CFLAGS CXXFLAGS LDFLAGS

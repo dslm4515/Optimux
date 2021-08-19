@@ -1,0 +1,55 @@
+# Tool Chain: Binutils
+# Build and install as oml
+
+# Link directories so libraries can be found in both lib & lib64
+case $(uname -m) in
+        x86_64) ln -sv lib /tools/lib64 ;;
+esac
+
+# Optimize build with some flags.
+export  CFLAGS="-march=native -pipe -O3 -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-fzero-call-used-regs=used"
+#export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Enable LTO and gold linker
+export XTRA="--enable-lto --enable-plugins --enable-gold "
+
+# Configure in dedicated build directory
+mkdir -v build && cd build
+
+# Configure source
+# Cannot use, LTO, as cross-tools has empty lto1 binary
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="$LDFLAGS" \
+../configure --prefix=/tools            \
+             --with-lib-path=/tools/lib \
+             --build=${OML_HOST}       \
+             --host=${OML_TARGET}      \
+             --target=${OML_TARGET}    \
+             --disable-nls              \
+             --disable-werror           \
+             --with-sysroot $XTRA
+
+# Build
+make
+
+# Install
+make install
+
+# Build and install linker that will be used later 
+# after adjusting toolchain
+make -C ld clean
+make -C ld LIB_PATH=/usr/lib:/lib
+cp -v ld/ld-new /tools/bin
+
+unset CFLAGS CXXFLAGS LDFLAGS

@@ -1,0 +1,21 @@
+# Tool Chain: Findutils
+# Build and install as oml
+
+sed -i 's/IO_ftrylockfile/IO_EOF_SEEN/' gl/lib/*.c               &&
+sed -i '/unistd/a #include <sys/sysmacros.h>' gl/lib/mountlist.c &&
+echo "#define _IO_IN_BACKUP 0x100" >> gl/lib/stdio-impl.h
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools
+
+# Build and install to toolchain
+make && make install

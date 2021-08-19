@@ -1,0 +1,31 @@
+# Final System: Libelf from elfutils
+# This section is done in Chroot environment
+
+# Add missing header
+cp -vr ../files/elfutils-void/error.h lib/ &&
+cp -vr ../files/elfutils-void/error.h src/ 
+
+# Regenerate configure script
+autoreconf -ifv
+
+# Optimize without LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-Os -fdata-sections -ffunction-sections -fno-lto "
+export CFLAGS+="-fno-semantic-interposition -fstack-protector-strong "
+export CFLAGS+="-fzero-call-used-regs=used "
+
+# Configure
+CFLAGS="$CFLAGS -DFNM_EXTMATCH=0 -Wno-error -Wno-error=null-dereference -Wl,-z,stack-size=2097152" \
+./configure --prefix=/usr \
+            --disable-debuginfod \
+            --enable-libdebuginfod=dummy \
+            --build=x86_64-linux-musl
+
+# Build
+make -C lib && make -C libelf
+
+# Install
+make -C libelf install
+install -vm644 config/libelf.pc /usr/lib/pkgconfig
+
+unset CFLAGS

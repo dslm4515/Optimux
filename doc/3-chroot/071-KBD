@@ -1,0 +1,82 @@
+# Final System: KBD
+# This section is done in Chroot environment
+
+# The behaviour of the backspace and delete keys is not 
+# consistent across the keymaps in the Kbd package. Fix
+# with patch from LFS.
+patch -Np1 -i ../patches/kbd-lfs/kbd-2.3.0-backspace-1.patch
+
+# Per LFS, Remove the redundant resizecons program (it 
+# requires the defunct svgalib to provide the video mode 
+# files - for normal use setfont sizes the console 
+# appropriately) together with its manpage. 
+sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+
+# Copy over missing header
+cp -v ../files/kbd-void/error.h .
+
+# Fixes suggested by void linux...
+# Rename keymap files with the same names
+# this is needed because when only name of keymap is specified
+# loadkeys loads the first keymap it can find, which is bad
+# this should be removed when upstream adopts the change
+mv data/keymaps/i386/qwertz/cz{,-qwertz}.map
+mv data/keymaps/i386/olpc/es{,-olpc}.map
+mv data/keymaps/i386/olpc/pt{,-olpc}.map
+mv data/keymaps/i386/fgGIod/trf{,-fgGIod}.map
+mv data/keymaps/i386/colemak/{en-latin9,colemak}.map
+
+# Fixes from Fedora Linux
+# 7-bit maps are obsolete; so are non-euro maps
+cd data/keymaps/i386
+#cp qwerty/pt-latin9.map qwerty/pt.map
+cp qwerty/sv-latin1.map qwerty/se-latin1.map
+mv azerty/fr.map azerty/fr-old.map
+cp azerty/fr-latin9.map azerty/fr.map
+#cp azerty/fr-latin9.map azerty/fr-latin0.map # legacy alias
+cd -
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr --disable-vlock --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+# Move and fixup legacy keymaps
+mkdir -pv /tmp/legacy
+mv /usr/share/keymaps/* /tmp/legacy/
+mv /tmp/legacy /usr/share/keymaps/
+
+# Make ISO-8815-9 maps the default, instead of 7-bit ones
+cd /usr/share/keymaps/legacy/i386
+ln -s pt-latin9.map.gz qwerty/pt.map.gz
+mv azerty/fr.map.gz azerty/fr-old.map.gz
+ln -s fr-latin9.map.gz azerty/fr.map.gz
+
+# Add some legacy aliases
+ln -s fr-latin9.map.gz azerty/fr-latin0.map.gz
+#ln -s sv-latin1.map.gz qwerty/se-latin1.map.gz
+ln -s sr-cy.map.gz qwerty/sr-latin.map.gz
+
+# Rename conflicting keymaps
+mv fgGIod/trf.map.gz fgGIod/trf-fgGIod.map.gz
+#mv olpc/es.map.gz olpc/es-olpc.map.gz
+#mv olpc/pt.map.gz olpc/pt-olpc.map.gz
+mv qwerty/cz.map.gz qwerty/cz-qwerty.map.gz
+
+# Remove useless layouts
+rm -f qwerty/ro_win.map.gz
+
+unset CFLAGS LDFLAGS
+

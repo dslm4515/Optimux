@@ -1,0 +1,25 @@
+# Tool Chain: Bzip2
+# Build and install as oml
+
+# Fix the Makefiles for  ensures installation of symbolic 
+# links are relative and the man pages are installed into 
+# the correct location:
+cp Makefile{,.orig}
+sed -e "/^all:/s/ test//" Makefile.orig > Makefile
+sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+
+# Prepare source
+make -f Makefile-libbz2_so \
+        CC="${OML_TARGET}-gcc" \
+        AR="${OML_TARGET}-ar" \
+        RANLIB="${OML_TARGET}-ranlib"
+make clean
+
+# Build
+make CC="${OML_TARGET}-gcc" \
+     AR="${OML_TARGET}-ar"  \
+     RANLIB="${OML_TARGET}-ranlib"
+
+# Install to tool chain
+make PREFIX=/tools install

@@ -1,0 +1,24 @@
+# Final System: MPC
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -g -pipe -fno-semantic-interposition "
+export CFLAGS+="-ffat-lto-objects -falign-functions=32 -fno-math-errno -fno-trapping-math "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="-flto=4 $CFLAGS" \
+CXXFLAGS="-flto=4 $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr   \
+            --disable-static \
+            --docdir=/usr/share/doc/mpc-1.2.1 \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

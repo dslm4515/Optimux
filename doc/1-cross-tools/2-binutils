@@ -1,0 +1,31 @@
+# Cross-Tools: Binutils
+# Build and install as oml
+
+# Create build directory in-tree
+mkdir -v build && cd build
+
+# Extra flags to build GCC with LTO and gold linker:
+export XCONFIG=" --enable-lto --enable-plugins --enable-gold"
+#export  CFLAGS="-flto -march=native -pipe -O3 -fno-semantic-interposition "
+#export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed "
+
+# configure source
+../configure \
+   --prefix=/cross-tools \
+   --target=${OML_TARGET} \
+   --with-sysroot=/cross-tools/${OML_TARGET} \
+   --disable-nls \
+   --disable-multilib \
+   --disable-werror \
+   --enable-deterministic-archives \
+   --disable-compressed-debug-sections $XCONFIG
+
+# build to check host can build
+make configure-host
+
+# Build and install
+make && make install
+
+# Clean up
+unset XCONFIG CFLAGS CXXFLAGS LDFLAGS

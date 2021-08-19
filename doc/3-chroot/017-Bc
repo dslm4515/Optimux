@@ -1,0 +1,21 @@
+# Final System: Bc
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -ffat-lto-objects "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="-flto=4 -std=c99 $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+PREFIX=/usr CC=gcc \
+./configure --prefix=/usr   \
+            --mandir=/usr/share/man -G -O3
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

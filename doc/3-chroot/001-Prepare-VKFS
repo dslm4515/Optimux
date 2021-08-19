@@ -1,0 +1,19 @@
+# Prepare Virtual Kernel Filesystems for chroot
+# This section is done by root
+
+export OML=/mnt/oml
+
+# Create directories and nodes
+mkdir -pv $OML/{dev,proc,sys,run}
+mknod -m 600 $OML/dev/console c 5 1
+mknod -m 666 $OML/dev/null c 1 3
+
+# Mount virtual filesystems
+mount -v --bind /dev $OML/dev
+mount -vt devpts devpts $OML/dev/pts -o gid=5,mode=620
+mount -vt proc proc $OML/proc
+mount -vt sysfs sysfs $OML/sys
+mount -vt tmpfs tmpfs $OML/run
+if [ -h $MLFS/dev/shm ]; then
+  mkdir -pv $OML/$(readlink $OML/dev/shm)
+fi

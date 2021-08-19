@@ -1,0 +1,25 @@
+From 2f24d1ca21a429eb2d95f02e8ba8e9a8c4e8f280 Mon Sep 17 00:00:00 2001
+From: "Mi, Dapeng1" <dapeng1.mi@intel.com>
+Date: Tue, 14 Jan 2020 13:03:05 +0800
+Subject: [PATCH perl] replace clean with distclean
+
+---
+ Makefile.SH | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.SH b/Makefile.SH
+index a2d5aab..9a28d65 100755
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -1376,7 +1376,7 @@ printconfig:
+ 	realclean _realcleaner clobber _clobber \
+ 	distclean veryclean _verycleaner
+ 
+-clean:		realclean
++clean:		clobber
+ 
+ realclean:	_realcleaner _mopup
+ 	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
+-- 
+2.24.1
+

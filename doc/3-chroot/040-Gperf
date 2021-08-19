@@ -1,0 +1,22 @@
+# Final System: Gperf
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --docdir=/usr/share/doc/gperf-3.1 \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS

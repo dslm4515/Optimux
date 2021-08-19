@@ -1,0 +1,23 @@
+# Final System: File
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="-flto $CFLAGS" \
+CXXFLAGS="-flto $CFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+./configure --prefix=/usr \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

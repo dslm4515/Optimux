@@ -1,0 +1,27 @@
+# Final System: Groff
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Set page size
+# This can be A4 in some regions/countries
+export PAGE_SIZE="letter"
+
+# Configure
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+PAGE=$PAGE_SIZE \
+./configure --prefix=/usr \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS PAGE_SIZE

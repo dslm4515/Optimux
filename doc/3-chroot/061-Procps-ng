@@ -1,0 +1,37 @@
+# Final System: Procps-ng
+# This section is done in Chroot environment
+
+# Regenerate configure script
+autoreconf -fiv
+
+# Apply patch to use utmps for utmp
+patch -Np1 -i ../patches/procps-mlfs/use_utmpx.patch
+
+# Add missing header
+sed -i '1i#include <langinfo.h>' proc/escape.c  
+
+# Optimize build with out LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-Os -fdata-sections -ffunction-sections -fno-lto "
+export CFLAGS+="-fno-semantic-interposition "
+
+LIBS="$LIBS -lutmps -lskarnet"   \
+CFLAGS="$CFLAGS" \
+./configure --prefix=/usr                            \
+            --exec-prefix=                           \
+            --libdir=/usr/lib                        \
+            --docdir=/usr/share/doc/procps-ng-3.3.17 \
+            --disable-static                         \
+            --disable-kill                           \
+            --enable-watch8bit                       \
+            --without-systemd \
+            --disable-modern-top \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS

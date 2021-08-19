@@ -1,0 +1,18 @@
+# Tools: Kernel Headers
+# Build & install as user oml
+
+# Kernel version greater than 5.9.16 will not compile under musl 
+patch -Np1 -i ../patches/kernel/include-uapi-linux-swab-Fix-potentially-missing-__always_inline.patch
+
+# Clean sources
+make mrproper
+
+# Build Headers
+make ARCH=${OML_ARCH} headers
+find usr/include \( -name .install -o -name ..install.cmd \) -delete
+
+# Install
+cp -rv usr/include/* /tools/include
+
+# Remove unnecessary Makefile
+rm -v /tools/include/Makefile

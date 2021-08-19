@@ -1,0 +1,16 @@
+# Enter the Chroot Environment
+# This section is done by root
+
+chroot "$OML" /tools/bin/env -i \
+    HOME=/root                  \
+    TERM="$TERM"                \
+    PS1='(Optimux chroot) \u:\w\$ ' \
+    PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin \
+    /tools/bin/bash --login +h
+
+# Establish variables for build
+export  TRUPLE="x86_64-linux-musl" 
+#export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+#export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export CXXFLAGS=$CFLAGS
+#export LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed

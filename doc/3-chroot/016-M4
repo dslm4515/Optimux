@@ -1,0 +1,22 @@
+# Final System: M4
+# This section is done in Chroot environment
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+
+# Apply patches
+patch -Np1 -i ../patches/m4-alpine/musl-realpath.patch 
+
+# Configure source
+CFLAGS="-fno-lto $CFLAGS" \
+CXXFLAGS="-fno-lto $CFLAGS" \
+./configure --prefix=/usr   \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

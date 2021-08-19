@@ -1,0 +1,30 @@
+# Final System: Musl FTS
+# This section is done in Chroot environment
+
+# Optimize with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -ffat-lto-objects "
+export CFLAGS+="-flto=4 -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Fix a file
+sed -i "/pkgconfig_DATA/i pkgconfigdir=/usr/lib/pkgconfig" Makefile.am 
+
+# Generate configure script
+./bootstrap.sh 
+
+# Configure source
+CFLAGS="$CFLAGS -fPIC" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --localstatedir=/var \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS

@@ -1,0 +1,74 @@
+# Final System: Bzip2
+# This section is done in Chroot environment
+
+# Apply patches from Clear Linux
+patch -Np1 -i ../patches/bzip2-clear/0001-Autotoolize-bzip2.patch 
+patch -Np1 -i ../patches/bzip2-clear/0002-Improve-file-access.patch
+
+# Create configure script...tool chain needs autotools!
+# Use patch instead of using autoreconf of auto-tools.
+# autoreconfig -vfi
+patch -Np1 -i ../patches/bzip2-mlfs/bzip2-reconfigured.patch
+chmod -v +x configure
+
+# Freeytpe requires this flag set for bzip2
+export CFLAGS="-fPIC "
+
+# Optimize build
+export  CFLAGS+="-march=native -mtune=native -O3 -pipe "
+export  CFLAGS+="-ffat-lto-objects -flto=4 -fno-semantic-interposition "
+export CXXFLAGS="$CFLAGS "
+export LDFLAGS="-flto=4 -Wl,-O2 -Wl,--as-needed "
+
+# Optimize further with PGO?
+export  CFLAGS_GENERATE="$CFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export CFLAGS_GENERATE+="-fprofile-update=atomic "
+export  CXXFLAGS_GENERATE="$CXXFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export CXXFLAGS_GENERATE+="-fprofile-update=atomic "
+export   LDFLAGS_GENERATE="$LDFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export  LDFLAGS_GENERATE+="-fprofile-update=atomic "
+export CFLAGS_USE="$CFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export CXXFLAGS_USE="$CXXFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export LDFLAGS_USE="$LDFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export  FCFLAGS_GENERATE="$FCFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo " 
+export FCFLAGS_GENERATE+="-fprofile-update=atomic "
+export  FFLAGS_GENERATE="$FFLAGS -fprofile-generate -fprofile-dir=/var/tmp/pgo "
+export FFLAGS_GENERATE+="-fprofile-update=atomic "
+export FCFLAGS_USE="$FCFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+export FFLAGS_USE="$FFLAGS -fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction "
+
+# Prepare source
+CFLAGS="${CFLAGS_GENERATE}" \
+CXXFLAGS="${CXXFLAGS_GENERATE}" \
+FFLAGS="${FFLAGS_GENERATE}" \
+FCFLAGS="${FCFLAGS_GENERATE}" \
+LDFLAGS="${LDFLAGS_GENERATE}" \
+./configure --prefix=/usr \
+            --disable-static \
+            --build=x86_64-linux
+
+# Build
+make
+
+# Install
+make install
+
+# Library has wrong version in file name. Fix it
+mv -v /usr/lib/libbz2.so.1.0.0 /lib/libbz2.so.1.0.8
+rm -v /usr/lib/{libbz2.so,libbz2.so.1}
+ln -sv ../../lib/libbz2.so.1.0.8 /usr/lib/libbz2.so
+ln -sv ../../lib/libbz2.so.1.0.8 /usr/lib/libbz2.so.1
+ln -sv libbz2.so.1.0.8 /lib/libbz2.so
+ln -sv libbz2.so.1.0.8 /lib/libbz2.so.1
+
+# Move misplaced and missing binaries
+mv /usr/bin/bzip2 /bin/
+ln -sv bzip2 /bin/bunzip2
+ln -sv bzip2 /bin/bzcat
+
+# Clean up
+unset CFLAGS CXXFLAGS LDFLAGS FFLAGS FCFLAGS CXXFLAGS_GENERATE FFLAGS_GENERATE 
+unset LDFLAGS_GENERATE FCFLAGS_GENERATE CXXFLAGS_USE FFLAGS_USE FCFLAGS_USE
+unset CFLAGS_GENERATE CFLAGS_USE LDFLAGS_USE

@@ -1,0 +1,66 @@
+# Final System: Shadow
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -g -pipe -fno-semantic-interposition "
+export CFLAGS+="-ffat-lto-objects -fstack-protector-strong -fzero-call-used-regs=used  "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Disable the installation of the groups program and its man pages, 
+# as Coreutils provides a better version. Also, prevent the 
+# installation of manual pages that were already
+sed -i 's/groups$(EXEEXT) //' src/Makefile.in                      &&
+find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \;  &&
+find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;  &&
+find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \;  
+
+# Use the more secure SHA-512 method of password encryption, which 
+# also allows passwords longer than 8 characters. It is also 
+# necessary to change the obsolete /var/spool/mail location for 
+# user mailboxes that Shadow uses by default to the /var/mail 
+# location used currently. Get rid of /bin and /sbin from PATH, 
+# since they are simply symlinks to their counterpart in /usr
+sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD SHA512:' \
+    -e 's:/var/spool/mail:/var/mail:'                 \
+    -e '/PATH=/{s@/sbin:@@;s@/bin:@@}'                \
+    -i etc/login.defs
+
+# Fix a simple programming error
+sed -e "224s/rounds/min_rounds/" -i libmisc/salt.c
+
+# The file /usr/bin/passwd needs to exist because its location 
+# is harcoded in some programs, and the default location if it 
+# does not exist is not right.
+touch /usr/bin/passwd 
+
+# Configure source
+CFLAGS="-flto=4 $CFLAGS" \
+CXXFLAGS="-flto=4 $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+LIBS="-lutmps -lskarnet" \
+./configure --with-group-name-max-length=32 \
+            --sysconfdir=/etc \
+            --enable-utmpx  \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make exec_prefix=/usr install
+mkdir -pv /BUILD/etc/default
+useradd -D --gid 999
+
+# Move misplaced binary
+mv -v /usr/bin/passwd /bin/ 
+
+# Disable mailbox files
+sed -i 's/yes/no/' /etc/default/useradd 
+
+# Enable shadow passwords
+pwconv && grpconv 
+
+# Set root password
+passwd root
+
+unset CFLAGS CXXFLAGS LDFLAGS

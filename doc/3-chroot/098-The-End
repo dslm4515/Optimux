@@ -1,0 +1,48 @@
+# The End
+
+# It may be a good idea to create an /etc/lfs-release file. By having this 
+# file, it is very easy for you (and for us if you need to ask for help at 
+# some point) to find out which MLFS version is installed on the system. 
+# Create this file by running: 
+echo 1.0.0 > /etc/optimux-release
+
+# It is also a good idea to create a file to show the status of your new 
+# system with respect to the Linux Standards Base (LSB). To create this file, run: 
+cat > /etc/lsb-release << "EOF"
+DISTRIB_ID="Optimux"
+DISTRIB_RELEASE="1.0.0"
+DISTRIB_CODENAME="<your name here>"
+DISTRIB_DESCRIPTION="Optimized Musl Linux From Scratch"
+EOF
+
+# If desired, an os-release file
+cat > /usr/lib/os-release << "EOF"
+NAME="Optimux"
+VERSION="1.0.0"
+ID=optimux
+ID_LIKE="lfs mlfs"
+PRETTY_NAME="Optimized Musl Linux From Scratch 1.0.0"
+VERSION_ID="1.0.0"
+HOME_URL="https://github.com/dslm4515/optimux"
+SUPPORT_URL="https://github.com/dslm4515/optimux/issues"
+BUG_REPORT_URL="https://github.com/dslm4515/optimux/issues"
+EOF
+
+# freedesktop.org defines that file can be in /etc or /usr/lib
+ln -sv ../usr/lib/os-release /etc/
+
+## Rebooting the System 
+
+# Exit chroot and unmount MLFS
+logout
+umount -v $OML/dev/pts
+umount -v $OML/dev
+umount -v $OML/run
+umount -v $OML/proc
+umount -v $OML/sys
+
+# Unmount if MLFS is on a seperate partition or HDD/SDD/device
+umount -v $OML
+
+# You may reboot your machine [if host and target are the same]
+

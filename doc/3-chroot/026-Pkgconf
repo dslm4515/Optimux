@@ -1,0 +1,26 @@
+# Final System: Pkgconf
+# This section is done in Chroot environment
+
+# Optimize build
+export CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+export CXXFLAGS="$CFLAGS"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure wtih LTO
+CFLAGS="-flto -ffat-lto-objects $CFLAGS" CXXFLAGS="-flto -ffat-lto-objects CXXFLAGS" \
+LDFLAGS="-flto $LDFLAGS" \
+./configure --prefix=/usr              \
+            --docdir=/usr/share/doc/pkgconf-1.8.0 \
+            --sysconfdir=/etc          \
+            --localstatedir=/var       \
+            --with-pkg-config-dir=/usr/lib/pkgconfig:/usr/share/pkgconfig:/opt/qt5/lib/pkgconfig \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+ln -s pkgconf /usr/bin/pkg-config
+
+unset CFLAGS CXXFLAGS LDFLAGS

@@ -1,0 +1,66 @@
+# Final System: Bash
+# This section is done in Chroot environment
+
+# Apply patches from Clear Linux:
+
+# Apply patch to fix a missing dependency on a constructed 
+# file, which can cause highly parellel builds to fail.
+patch -Np0 -i ../patches/bash-clear/bash51-001.patch
+
+# Apply patch: If there are no jobs, and the `-n' and `-p' 
+# options are both supplied to `wait', bash can assign a 
+# value to the variable name specified with `-p' instead 
+# of leaving it unset.
+patch -Np0 -i ../patches/bash-clear/bash51-002.patch 
+
+# Apply patch: Bash does not put a command substitution 
+# process that is started to perform an expansion in a 
+# child process into the right process group where it can 
+# receive keyboard-generated signals.
+patch -Np0 -i ../patches/bash-clear/bash51-003.patch
+
+# Apply Patch: This patch makes key-value assignment and 
+# subscript assignment perform the same expansions when 
+# they're supplied as an argument to `declare'.
+patch -Np0 -i ../patches/bash-clear/bash51-004.patch
+
+# Apply Patch: Fix two memory leaks when assigning arrays 
+# using compound assignment syntax.
+patch -Np0 -i ../patches/bash-clear/bash51-005.patch
+
+# Make sure child processes forked to run command 
+# substitutions are in theproper process group.
+patch -Np0 -i ../patches/bash-clear/bash51-006.patch
+
+# Apply Patch: The code to check readline versions in an 
+# inputrc file had the sense of the comparisons reversed.
+patch -Np0 -i ../patches/bash-clear/bash51-007.patch
+
+# Apply patch: Process substitution FIFOs opened by child 
+# processes as targets of redirections were not removed 
+# appropriately, leaving remnants in the file system.
+patch -Np0 -i ../patches/bash-clear/bash51-008.patch
+
+# Optimize build without LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-Os -fdata-sections -ffunction-sections "
+export CFLAGS+="-fno-lto -fno-semantic-interposition "
+export CFLAGS+="-fstack-protector-strong -fzero-call-used-regs=used "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+./configure --prefix=/usr                       \
+            --docdir=/usr/share/doc/bash-5.1 \
+            --without-bash-malloc               \
+            --with-installed-readline \
+            --with-curses \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+mv -vf /usr/bin/bash /bin
+
+unset CFLAGS

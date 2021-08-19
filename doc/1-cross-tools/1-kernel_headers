@@ -1,0 +1,21 @@
+# Cross-Tools: Kernel Headers
+# Build & install as user oml
+
+# Kernel version greater than 5.9.16 will not compile under musl 
+patch -Np1 -i ../patches/kernel/include-uapi-linux-swab-Fix-potentially-missing-__always_inline.patch
+
+# Clean sources
+make mrproper
+
+# Build Headers
+make ARCH=${OML_ARCH} headers_check
+
+# Install
+make ARCH=${OML_ARCH} headers
+mkdir -pv /cross-tools/${OML_TARGET}/include
+
+cp -rv usr/include/* /cross-tools/${OML_TARGET}/include
+
+# Remove unnecessary Makefile
+rm -v /cross-tools/${OML_TARGET}/include/Makefile
+

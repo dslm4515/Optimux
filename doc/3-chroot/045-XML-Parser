@@ -1,0 +1,11 @@
+# Final System: XML::Parser
+# This section is done in Chroot environment
+
+# Configure
+perl Makefile.PL
+
+# Build
+make
+
+# Install
+make install

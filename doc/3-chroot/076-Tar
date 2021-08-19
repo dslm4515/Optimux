@@ -1,0 +1,24 @@
+# Final System: Tar
+# This section is done in Chroot environment
+
+# Optimize build withiout LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -fno-lto -fstack-protector-strong "
+export CFLAGS+="-fzero-call-used-regs=used "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+FORCE_UNSAFE_CONFIGURE=1 \
+gl_cv_func_gettimeofday_clobber=no \
+gl_cv_func_tzset_clobber=no \
+./configure --prefix=/usr  \
+            --bindir=/bin  \
+            --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS

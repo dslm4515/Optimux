@@ -1,0 +1,21 @@
+# Final System: Gettext-tiny
+# This section is done in Chroot environment
+
+# Apply patches from Adelie Linux
+patch -Np1 -i ../patches/gettext-tiny-adiele/line-length.patch           &&
+patch -Np1 -i ../patches/gettext-tiny-adiele/respect-cflags.patch        &&
+patch -Np1 -i ../patches/gettext-tiny-adiele/stop-doing-macro-crap.patch
+
+# Optimize with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -fdata-sections -ffunction-sections "
+export CFLAGS+="-fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Build
+CFLAGS="-flto=4 -ffat-lto-objects $CFLAGS" LDFLAGS="-flto=4 $LDFLAGS" make LIBINTL=MUSL prefix=/usr
+
+# Install
+make LIBINTL=MUSL prefix=/usr install
+
+unset CFLAGS LDFLAGS

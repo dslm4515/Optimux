@@ -1,0 +1,27 @@
+# Tool Chain: TCL
+# Build and install as oml
+# Can be optional: Package used for testing final system packages
+
+cd unix
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+ac_cv_func_strtod=yes \
+tcl_cv_strtod_buggy=1 \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools
+
+# Build & install
+make && make install
+
+# Install Headers and create link
+chmod -v u+w /tools/lib/libtcl8.6.so
+make install-private-headers
+ln -sv tclsh8.6 /tools/bin/tclsh

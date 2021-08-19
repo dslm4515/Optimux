@@ -1,0 +1,23 @@
+# Tool Chain: Flex
+# Build and install as oml
+# Optional: Only required if compiling a snapshot
+# of GCC source. Not needed for stable/upsteam 
+# GCC releases
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+ac_cv_func_malloc_0_nonnull=yes   \
+ac_cv_func_realloc_0_nonnull=yes  \
+HELP2MAN=/tools/bin/true          \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools
+
+# Build and install to toolchain
+make && make install

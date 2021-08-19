@@ -1,0 +1,21 @@
+# Final System: Autoconf
+# This section is done in Chroot environment
+
+# Optimize with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -fdata-sections -ffat-lto-objects -ffunction-sections "
+export CFLAGS+="-flto=4 -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+#configure source
+CFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS

@@ -1,0 +1,46 @@
+# Stripping 
+# This step is optional, but if the OML partition 
+# is rather small, it is beneficial to learn that 
+# unnecessary items can be removed. The executables 
+# and libraries built so far contain about 70 MB 
+# of unneeded debugging symbols. 
+
+# Remove debug symbols with: 
+find /tools/lib/ -maxdepth 1 -type f -exec /usr/bin/strip --strip-debug {} \;
+find /tools/bin/ -maxdepth 1 -type f -exec /usr/bin/strip --strip-unneeded {} \;
+find /tools/libexec/gcc/x86_64-optimux-linux-musl/11.2.0 \
+     -maxdepth 1 -type f -exec /usr/bin/strip --strip-unneeded {} \;
+
+# Remove the documentation:
+rm -rf /tools/{,share}/{info,man,doc}
+
+# Remove unneeded files:
+find /tools/{lib,libexec} -name \*.la -delete
+
+# Changing Ownership 
+# Currently, the $OML/tools directory is owned by 
+# the user mlfs, a user that exists only on the 
+# host system. If the $OML/tools directory is kept 
+# as is, the files are owned by a user ID without 
+# a corresponding account. This is dangerous because 
+# a user account created later could get this same 
+# user ID and would own the $OML/tools directory 
+# and all the files therein, thus exposing these 
+# files to possible malicious manipulation.
+
+# To avoid this issue, you could add the oml user 
+# to the new Optimux system later when creating the 
+# /etc/passwd file, taking care to assign it the 
+# same user and group IDs as on the host system. 
+
+# ************************************************
+# The commands in the remainder of this build must 
+# be performed while logged in as user root and 
+# no longer as user oml. Also, double check that 
+# $OML is set in root's environment.
+# ************************************************
+
+# Change the ownership of the $OML/tools directory 
+# to user root by running the following command:
+chown -R root:root $OML/tools
+

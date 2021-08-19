@@ -1,0 +1,26 @@
+# Final System: GMP
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -O3 -g -pipe -fno-semantic-interposition "
+export CFLAGS+="-ffat-lto-objects "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="-flto=4 $CFLAGS" \
+CXXFLAGS="-flto=4 $CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr   \
+            --enable-cxx  \
+            --disable-static \
+            --enable-shared \
+            --docdir=/usr/share/doc/gmp-6.2.1 \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS CXXFLAGS LDFLAGS

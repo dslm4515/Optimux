@@ -1,0 +1,41 @@
+# Final System: Vim
+# This section is done in Chroot environment
+
+# change the default location of the vimrc configuration file to /etc
+echo '#define SYS_VIMRC_FILE "/etc/vimrc"' >> src/feature.h
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native -pipe "
+export CFLAGS+="-O3 -Ofast -falign-functions=32 "
+export CFLAGS+="-ffat-lto-objects -flto=auto "
+export CFLAGS+="-fno-semantic-interposition -mprefer-vector-width=256 "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=auto $LDFLAGS" \
+./configure --prefix=/usr  --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+make install
+
+# Many users are used to using vi instead of vim. To allow 
+# execution of vim when users habitually enter vi, create 
+# a symlink for both the binary and the man page in the 
+# provided languages:
+ln -sv vim /usr/bin/vi
+for L in  /usr/share/man/{,*/}man1/vim.1; do
+    ln -sv vim.1 $(dirname $L)/vi.1
+done
+
+# Create the symlink allows the documentation to be 
+# accessed via /usr/share/doc/vim-8.2.3321, making 
+# it consistent with the location of documentation 
+# for other packages:
+ln -sv ../vim/vim82/doc /usr/share/doc/vim-8.2.3321
+
+unset CFLAGS LDFLAGS

@@ -1,0 +1,30 @@
+# Final System: Argp-Standalone
+# This section is done in Chroot environment
+
+# Optimize build
+export  CFLAGS="-march=native -mtune=native -O3 -pipe -fno-semantic-interposition "
+export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Apply patches
+patch -Np0 -i ../patches/argp-standalone-void/fix-no_use_inline.patch       &&
+patch -Np1 -i ../patches/argp-standalone-adelie/001-throw-in-funcdef.patch  &&
+patch -Np1 -i ../patches/argp-standalone-adelie/gnu89-inline.patch
+
+CFLAGS="-flto $CFLAGS -fPIC" \
+CXXFLAGS="-flto $CFLAGS -fPIC" \
+LDFLAGS="-flto $LDFLAGS"  ./configure --prefix=/usr     \
+                                     --disable-static  \
+                                     --sysconfdir=/etc \
+                                     --localstatedir=/var  \
+                                     --build=x86_64-linux-musl
+
+# Build
+make
+
+# Install
+install -v -D -m644  libargp.a /usr/lib/     &&
+install -v -D -m644  argp.h    /usr/include/
+
+unset CFLAGS CXXFLAGS LDFLAGS

@@ -1,0 +1,33 @@
+# Tool Chain: Expect
+# Build and install as oml
+# Can be optional: Package used for testing final system packages
+# *No need to use latest version, so far. If so, patches need updating.*
+
+# Patch source to build with musl libc
+patch -Np1 -i ../patches/expect-5.45.3/dont-put-toolchain-in-libpath.patch
+patch -Np1 -i ../patches/expect-5.45.3/dont-configure-testsuites.patch
+patch -Np1 -i ../patches/expect-5.45.3/allow-cross-compile.patch
+
+# Update files to support Musl Libc for configure
+cp -v ../files/config.guess-musl tclconfig/config.guess
+cp -v ../files/config.sub-musl tclconfig/config.sub
+
+cp -v configure{,.orig}
+sed 's:/usr/local/bin:/bin:' configure.orig > configure
+
+# Configure source
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools \
+            --with-tcl=/tools/lib \
+            --with-tclinclude=/tools/include
+
+# Build and install to toolchain
+make && make SCRIPTS="" install

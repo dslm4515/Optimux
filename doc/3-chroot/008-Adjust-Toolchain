@@ -1,0 +1,67 @@
+# Final System - Adjust Tool Chain
+# This section is done in Chroot environment
+
+# Since final system's musl libc is built, time to adjust 
+# tool chain to use the dynamic interpreter in /lib 
+# instead of in /tools/lib
+
+export OML_TARGET="x86_64-optimux-linux-musl"
+
+# Change linkers to link to /lib instead of /tools/lib
+mv -v /tools/bin/{ld,ld-old}
+mv -v /tools/${OML_TARGET}/bin/{ld,ld-old}
+mv -v /tools/bin/{ld-new,ld}
+ln -sv /tools/bin/ld /tools/${OML_TARGET}/bin/ld
+
+# Extract tool chains' GCC's spec file and adjust it:
+export SPECFILE=`dirname $(gcc -print-libgcc-file-name)`/specs
+gcc -dumpspecs | sed -e 's@/tools@@g'                   \
+    -e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+    -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' >  tempspecfile
+
+# Install new spec file
+mv -vf tempspecfile $SPECFILE &&
+unset SPECFILE  OML_TARGET
+
+# Check the basic functions (compiling and linking) of 
+# the adjusted toolchain are working as expected. To do 
+# this, perform the following sanity checks:
+echo 'int main(){}' > dummy.c
+cc dummy.c -v -Wl,--verbose &> dummy.log
+readelf -l a.out | grep ': /lib'
+# Should output:
+# [Requesting program interpreter: /lib/ld-musl-x86_64.so.1]
+# or
+# [Requesting program interpreter: /lib/ld-musl-i386.so.1]
+# or
+# [Requesting program interpreter: /lib/ld-musl-arm.so.1]
+# or
+# [Requesting program interpreter: /lib/ld-musl-arch64.so.1]
+
+# Make sure that we're setup to use the correct start files: 
+grep -o '/usr/lib.*/crt[1in].*succeeded' dummy.log
+# Should output:
+# /usr/lib/crt1.o succeeded
+# /usr/lib/crti.o succeeded
+# /usr/lib/crtn.o succeeded
+
+# Verify that the compiler is searching for the correct 
+# header files: 
+grep -B1 '^ /usr/include' dummy.log
+# Should output:
+# #include <...> search starts here:
+# /usr/include
+
+# Verify that the new linker is being used with the 
+# correct search paths: 
+grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+# Should output:
+# SEARCH_DIR("=/tools/x86_64-mlfs-linux-musl/lib64")
+# SEARCH_DIR("/usr/lib")
+# SEARCH_DIR("/lib")
+# SEARCH_DIR("=/tools/x86_64-mlfs-linux-musl/lib")
+# ^ first and last line can be ignored
+
+# Once everything is working correctly, clean up 
+# the test files:
+rm -v dummy.c a.out dummy.log

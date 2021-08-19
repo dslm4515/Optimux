@@ -1,0 +1,37 @@
+# Cross-Tools: Musl
+# Build and install as oml
+
+# Apply some flags...
+#export  CFLAGS="-march=native -pipe -O3 -fno-semantic-interposition "
+#export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source for cross build
+#CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS" \
+./configure \
+  CROSS_COMPILE=${OML_TARGET}- \
+  --prefix=/ \
+  --target=${OML_TARGET}
+
+# Build and install
+make && DESTDIR=/cross-tools make install
+
+# Add missing directory and link
+mkdir -v /cross-tools/usr
+ln -sv ../include  /cross-tools/usr/include
+
+# Fix link
+rm -vf /cross-tools/lib/ld-musl-x86_64.so.1 &&
+ln -sv libc.so /cross-tools/lib/ld-musl-x86_64.so.1
+
+# Optionally, create link for ldd:
+ln -sv ../lib/ld-musl-x86_64.so.1 /cross-tools/bin/ldd
+
+# Create config for dynamic library loading:
+mkdir -v /cross-tools/etc
+cat > /cross-tools/etc/ld-musl-x86_64.path << "EOF"
+/cross-tools/lib
+/tools/lib
+EOF
+
+unset CFLAGS CXXFLAGS LDFLAGS

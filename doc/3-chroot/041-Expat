@@ -1,0 +1,27 @@
+# Final System: Expat
+# This section is done in Chroot environment
+
+# Optimize build with LTO
+export  CFLAGS="-march=native -mtune=native "
+export CFLAGS+="-O3 -ffat-lto-objects -flto=4 "
+export CFLAGS+="-falign-functions=32  -fno-math-errno "
+export CFLAGS+="-fno-semantic-interposition -fno-trapping-math "
+export CFLAGS+="-fstack-protector-strong -fzero-call-used-regs=used "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+
+# Configure source
+CFLAGS="$CFLAGS" \
+CXXFLAGS="$CFLAGS" \
+LDFLAGS="-flto=4 $LDFLAGS" \
+./configure --prefix=/usr \
+            --disable-static \
+            --docdir=/usr/share/doc/expat-2.4.1 \
+            --build=x86_64-linux-musl
+
+# Build
+make 
+
+# Install
+make install
+
+unset CFLAGS LDFLAGS
