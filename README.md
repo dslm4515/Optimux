@@ -34,9 +34,9 @@ LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 ### Goals
 
 <ul>
-<li> [ ] Build GCC with Graphite </li>
-<li> [ ] Build GCC with LTO(full) support </li>
-<li> [ ] Build rootfs with LTO and optimizing flags </li>
+<li> [x] Build GCC with Graphite </li>
+<li> [x] Build GCC with LTO(full) support </li>
+<li> [x] Build rootfs with LTO and optimizing flags </li>
 <li> [ ] Clean up patches for GCC-11.2 </li>
 <li> [ ] Add autotools (automake, autoconf) to tools </li>
 <li> [ ] Add script to check build requirements </li>
