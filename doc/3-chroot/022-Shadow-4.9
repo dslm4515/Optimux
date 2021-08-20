@@ -1,5 +1,9 @@
 # Final System: Shadow
 # This section is done in Chroot environment
+# **********************************************************************************
+# Build is broken and will cause built rootfs to refuse to login any account on boot
+# **********************************************************************************
+# Use shadow-4.8 for now
 
 # Optimize build with LTO
 export  CFLAGS="-march=native -mtune=native -O3 -g -pipe -fno-semantic-interposition "
