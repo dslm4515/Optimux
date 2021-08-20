@@ -1,7 +1,7 @@
 https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.13.8.tar.xz
 https://ftp.gnu.org/gnu/binutils/binutils-2.37.tar.xz
 https://ftp.gnu.org/gnu/gcc/gcc-11.2.0/gcc-11.2.0.tar.xz
-http://musl.libc.org/releases/musl-1.2.2.tar.gz
+https://musl.libc.org/releases/musl-1.2.2.tar.gz
 https://astron.com/pub/file/file-5.40.tar.gz
 https://ftp.gnu.org/gnu/mpc/mpc-1.2.1.tar.gz
 https://ftp.gnu.org/gnu/gmp/gmp-6.2.1.tar.xz
@@ -19,7 +19,7 @@ https://ftp.gnu.org/gnu/coreutils/coreutils-8.32.tar.xz
 https://ftp.gnu.org/gnu/diffutils/diffutils-3.8.tar.xz
 https://ftp.gnu.org/gnu/findutils/findutils-4.8.0.tar.xz
 https://ftp.gnu.org/gnu/gawk/gawk-5.1.0.tar.xz
-http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-0.3.2.tar.xz
+https://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-0.3.2.tar.xz
 https://ftp.gnu.org/gnu/grep/grep-3.6.tar.xz
 https://ftp.gnu.org/gnu/gzip/gzip-1.10.tar.xz
 https://ftp.gnu.org/gnu/make/make-4.3.tar.gz
@@ -34,12 +34,12 @@ https://github.com/westes/flex/releases/download/v2.6.4/flex-2.6.4.tar.gz
 https://github.com/vim/vim/archive/refs/tags/v8.2.3321.tar.gz
 https://www.kernel.org/pub/linux/utils/util-linux/v2.37/util-linux-2.37.1.tar.xz
 https://www.kernel.org/pub/linux/docs/man-pages/man-pages-5.12.tar.xz
-http://skarnet.org/software/skalibs/skalibs-2.10.0.3.tar.gz
+https://skarnet.org/software/skalibs/skalibs-2.10.0.3.tar.gz
 https://skarnet.org/software/utmps/utmps-0.1.0.2.tar.gz
 https://dev.alpinelinux.org/archive/posixtz/posixtz-0.5.tar.xz
 https://www.iana.org/time-zones/repository/releases/tzdata2021a.tar.gz
 https://www.iana.org/time-zones/repository/releases/tzcode2021a.tar.gz
-http://www.lysator.liu.se/~nisse/misc/argp-standalone-1.3.tar.gz
+https://www.lysator.liu.se/~nisse/misc/argp-standalone-1.3.tar.gz
 https://github.com/zlib-ng/zlib-ng/archive/refs/tags/2.0.5.tar.gz
 https://ftp.gnu.org/gnu/readline/readline-8.1.tar.gz
 https://github.com/gavinhoward/bc/releases/download/5.0.0/bc-5.0.0.tar.xz
@@ -65,7 +65,7 @@ https://github.com/pullmoll/musl-obstack/archive/v1.1.tar.gz
 https://www.kernel.org/pub/linux/utils/kernel/kmod/kmod-29.tar.xz
 https://sourceware.org/ftp/elfutils/0.185/elfutils-0.185.tar.bz2
 https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
-http://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.3.3.tar.gz
+https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.3.3.tar.gz
 https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tar.xz
 https://github.com/michaelforney/samurai/releases/download/1.2/samurai-1.2.tar.gz
 https://github.com/mesonbuild/meson/releases/download/0.59.0/meson-0.59.0.tar.gz
@@ -75,7 +75,7 @@ https://ftp.gnu.org/gnu/groff/groff-1.22.4.tar.gz
 https://ftp.gnu.org/gnu/grub/grub-2.06.tar.xz
 https://www.kernel.org/pub/linux/utils/net/iproute2/iproute2-5.13.0.tar.xz
 https://www.kernel.org/pub/linux/utils/kbd/kbd-2.4.0.tar.xz
-http://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.3.tar.gz
+https://download.savannah.gnu.org/releases/libpipeline/libpipeline-1.5.3.tar.gz
 https://download.savannah.gnu.org/releases/man-db/man-db-2.9.4.tar.xz
 https://downloads.sourceforge.net/project/e2fsprogs/e2fsprogs/v1.46.3/e2fsprogs-1.46.3.tar.gz
 https://dev.gentoo.org/~blueness/eudev/eudev-3.2.10.tar.gz
