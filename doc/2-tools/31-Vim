@@ -19,7 +19,7 @@
 # Configure and use gcc in /tools
 LDFLAGS="-L/tools/lib" \
 CPPFLAGS="-I/tools/include" \
-./configure --prefix=/tools --without-x
+./configure --prefix=/tools --enable-gui=no --without-x
 
 # Build and install to toolchain
 make && make install
