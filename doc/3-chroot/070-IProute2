@@ -25,6 +25,7 @@ export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
 CFLAGS="-D_GNU_SOURCE $CFLAGS" \
 LDFLAGS="-flto=4 $LDFLAGS" \
 ./configure --prefix=/usr \
+            --sbindir=/sbin \
             --sysconfdir=/etc \
             --mandir=/usr/share/man \
             --localstatedir=/var \
@@ -34,6 +35,6 @@ LDFLAGS="-flto=4 $LDFLAGS" \
 make CCOPTS="-D_GNU_SOURCE $CFLAGS"
 
 # Install
-make SBINDIR=/usr/sbin install
+make SBINDIR=/sbin install
 
 unset CFLAGS LDFLAGS 
