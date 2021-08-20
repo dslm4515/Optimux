@@ -54,12 +54,13 @@ make
 make install
 
 # Move and fixup legacy keymaps
-mkdir -pv /tmp/legacy
-mv /usr/share/keymaps/* /tmp/legacy/
-mv /tmp/legacy /usr/share/keymaps/
+#mkdir -pv /tmp/legacy
+#mv /usr/share/keymaps/* /tmp/legacy/
+#mv /tmp/legacy /usr/share/keymaps/
 
 # Make ISO-8815-9 maps the default, instead of 7-bit ones
-cd /usr/share/keymaps/legacy/i386
+#cd /usr/share/keymaps/legacy/i386
+cd /usr/share/keymaps/i386
 ln -s pt-latin9.map.gz qwerty/pt.map.gz
 mv azerty/fr.map.gz azerty/fr-old.map.gz
 ln -s fr-latin9.map.gz azerty/fr.map.gz
