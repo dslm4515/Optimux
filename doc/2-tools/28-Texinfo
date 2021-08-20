@@ -9,6 +9,7 @@ AS="${OML_TARGET}-as" \
 RANLIB="${OML_TARGET}-ranlib" \
 LD="${OML_TARGET}-ld" \
 STRIP="${OML_TARGET}-strip" \
+CFLAGS="-L/tools/lib/ " \
 ./configure --build=${OML_HOST} \
             --host=${OML_TARGET} \
             --prefix=/tools

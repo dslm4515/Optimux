@@ -23,3 +23,6 @@ STRIP="${OML_TARGET}-strip" \
 
 # Build and install to toolchain
 make && make install
+
+# Some packages look for libncurses
+ln  -sv libncursesw.so.6.2 /tools/lib/libncurses.so
