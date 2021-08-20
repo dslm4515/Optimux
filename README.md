@@ -72,4 +72,4 @@ LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 
 ### Issues
 
-None at the moment
+Built system will not allow any logins. This was caused by a broken Shadow-4.9 build. Using shadow-4.8 build from MLFS for now.
