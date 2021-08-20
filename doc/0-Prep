@@ -35,6 +35,7 @@ wget --input-file=sources.list --continue --directory-prefix=$OML/sources/pkgs
 # After downloading the sources it is highly recommended to verify the sources
 # using the hashes provided in the sources.md5 file:
 mv -v sources.md5 $OML/sources/pkgs
+cd $OML/sources/pkgs
 md5sum -c sources.md5
 
 # Create user and group
