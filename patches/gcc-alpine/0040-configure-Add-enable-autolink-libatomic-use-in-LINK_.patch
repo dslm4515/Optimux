@@ -1,27 +1,16 @@
-From 8ac36878ba8714afeac6f439632de8bacb2e72e3 Mon Sep 17 00:00:00 2001
 From: Drew DeVault <sir@cmpwn.com>
-Date: Wed, 9 Dec 2020 16:07:26 +0000
+From: Olsken (updated patches)
+Date: Sat, 21 Aug 2021 08:51:52 +0000
 Subject: [PATCH] configure: Add --enable-autolink-libatomic, use in
  LINK_GCC_C_SEQUENCE_SPEC [PR81358]
 
 This fixes issues with RISC-V.
----
- Makefile.in           |  1 +
- gcc/config.in         |  6 ++++++
- gcc/config/gnu-user.h | 12 +++++++++++-
- gcc/configure         | 34 ++++++++++++++++++++++++++++++++--
- gcc/configure.ac      | 23 ++++++++++++++++++++++-
- gcc/doc/install.texi  |  8 ++++++++
- gcc/doc/tm.texi       |  8 +++++++-
- gcc/doc/tm.texi.in    |  8 +++++++-
- gcc/gcc.c             | 12 +++++++++++-
- 9 files changed, 105 insertions(+), 7 deletions(-)
 
 diff --git a/Makefile.in b/Makefile.in
-index c7f1f84d683..cb3983ca547 100644
+index 047be0255..765f6b89b 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -222,6 +222,7 @@ HOST_EXPORTS = \
+@@ -221,6 +221,7 @@ HOST_EXPORTS = \
  	RANLIB_FOR_TARGET="$(RANLIB_FOR_TARGET)"; export RANLIB_FOR_TARGET; \
  	READELF_FOR_TARGET="$(READELF_FOR_TARGET)"; export READELF_FOR_TARGET; \
  	TOPLEVEL_CONFIGURE_ARGUMENTS="$(TOPLEVEL_CONFIGURE_ARGUMENTS)"; export TOPLEVEL_CONFIGURE_ARGUMENTS; \
@@ -30,7 +19,7 @@ index c7f1f84d683..cb3983ca547 100644
  	GMPLIBS="$(HOST_GMPLIBS)"; export GMPLIBS; \
  	GMPINC="$(HOST_GMPINC)"; export GMPINC; \
 diff --git a/gcc/config.in b/gcc/config.in
-index 9551c0dfdf9..c8ca910df8a 100644
+index 313c13c8e..d0287d4cc 100644
 --- a/gcc/config.in
 +++ b/gcc/config.in
 @@ -106,6 +106,12 @@
@@ -47,7 +36,7 @@ index 9551c0dfdf9..c8ca910df8a 100644
     format instead of DPD */
  #ifndef USED_FOR_TARGET
 diff --git a/gcc/config/gnu-user.h b/gcc/config/gnu-user.h
-index 7f30c363e4a..246698bfea5 100644
+index e1a04e9fd..ef1ffa6d2 100644
 --- a/gcc/config/gnu-user.h
 +++ b/gcc/config/gnu-user.h
 @@ -109,8 +109,18 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
@@ -71,18 +60,18 @@ index 7f30c363e4a..246698bfea5 100644
  
  #undef LINK_GCC_C_SEQUENCE_SPEC
 diff --git a/gcc/configure b/gcc/configure
-index 808570b6c99..6c1e95e0444 100755
+index 9b28369e3..8afa1c84f 100755
 --- a/gcc/configure
 +++ b/gcc/configure
-@@ -969,6 +969,7 @@ with_documentation_root_url
- with_changes_root_url
+@@ -978,6 +978,7 @@ with_changes_root_url
  enable_languages
  with_multilib_list
+ with_multilib_generator
 +enable_autolink_libatomic
  with_zstd
  with_zstd_include
  with_zstd_lib
-@@ -1695,6 +1696,9 @@ Optional Features:
+@@ -1706,6 +1707,9 @@ Optional Features:
    --disable-shared        don't provide a shared libgcc
    --disable-gcov          don't provide libgcov and related host tools
    --enable-languages=LIST specify which front-ends to build
@@ -92,7 +81,7 @@ index 808570b6c99..6c1e95e0444 100755
    --disable-rpath         do not hardcode runtime library paths
    --enable-sjlj-exceptions
                            arrange to use setjmp/longjmp exception handling
-@@ -8009,6 +8013,33 @@ else
+@@ -8076,6 +8080,33 @@ else
  fi
  
  
@@ -126,27 +115,36 @@ index 808570b6c99..6c1e95e0444 100755
  # -------------------------
  # Checks for other programs
  # -------------------------
-@@ -19131,7 +19162,7 @@ else
+@@ -19392,7 +19423,7 @@ else
    lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
    lt_status=$lt_dlunknown
    cat > conftest.$ac_ext <<_LT_EOF
--#line 19131 "configure"
-+#line 19158 "configure"
+-#line 19395 "configure"
++#line 19426 "configure"
  #include "confdefs.h"
  
  #if HAVE_DLFCN_H
-@@ -32267,4 +32298,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
+@@ -19498,7 +19529,7 @@ else
+   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+   lt_status=$lt_dlunknown
+   cat > conftest.$ac_ext <<_LT_EOF
+-#line 19501 "configure"
++#line 19532 "configure"
+ #include "confdefs.h"
+ 
+ #if HAVE_DLFCN_H
+@@ -33588,4 +33619,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
  $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
  fi
  
 -
 diff --git a/gcc/configure.ac b/gcc/configure.ac
-index 9c2571de709..52fd6d8fe06 100644
+index 162e08cbc..115ba8ac6 100644
 --- a/gcc/configure.ac
 +++ b/gcc/configure.ac
-@@ -1110,6 +1110,28 @@ AC_ARG_WITH(multilib-list,
+@@ -1149,6 +1149,28 @@ AC_ARG_WITH(multilib-generator,
  :,
- with_multilib_list=default)
+ with_multilib_generator=default)
  
 +# If libatomic is available, whether it should be linked automatically
 +AC_ARG_ENABLE(autolink-libatomic,
@@ -173,16 +171,16 @@ index 9c2571de709..52fd6d8fe06 100644
  # -------------------------
  # Checks for other programs
  # -------------------------
-@@ -6945,4 +6967,3 @@ done
+@@ -7553,4 +7575,3 @@ done
  ], 
  [subdirs='$subdirs'])
  AC_OUTPUT
 -
 diff --git a/gcc/doc/install.texi b/gcc/doc/install.texi
-index 7d98ec4190a..a58d5a05be2 100644
+index 4c38244ae..4a544e6a4 100644
 --- a/gcc/doc/install.texi
 +++ b/gcc/doc/install.texi
-@@ -2169,6 +2169,14 @@ files, but these changed header paths may conflict with some compilation
+@@ -2213,6 +2213,14 @@ files, but these changed header paths may conflict with some compilation
  environments.  Enabled by default, and may be disabled using
  @option{--disable-canonical-system-headers}.
  
@@ -198,7 +196,7 @@ index 7d98ec4190a..a58d5a05be2 100644
  Tell GCC that when the GNU C Library (glibc) is used on the target it
  will be version @var{major}.@var{minor} or later.  Normally this can
 diff --git a/gcc/doc/tm.texi b/gcc/doc/tm.texi
-index fcb7245e95c..67b485e8d0c 100644
+index b370bc76b..acc782739 100644
 --- a/gcc/doc/tm.texi
 +++ b/gcc/doc/tm.texi
 @@ -381,7 +381,13 @@ the argument @option{-lgcc} to tell the linker to do the search.
@@ -217,7 +215,7 @@ index fcb7245e95c..67b485e8d0c 100644
  
  @defmac POST_LINK_SPEC
 diff --git a/gcc/doc/tm.texi.in b/gcc/doc/tm.texi.in
-index c17209daa51..3ec63f6d091 100644
+index 2974dae27..80e003a38 100644
 --- a/gcc/doc/tm.texi.in
 +++ b/gcc/doc/tm.texi.in
 @@ -381,7 +381,13 @@ the argument @option{-lgcc} to tell the linker to do the search.
@@ -236,11 +234,11 @@ index c17209daa51..3ec63f6d091 100644
  
  @defmac POST_LINK_SPEC
 diff --git a/gcc/gcc.c b/gcc/gcc.c
-index 40e07354b3d..81bd50b4d7c 100644
+index d7f3ee55c..bc1bd1686 100644
 --- a/gcc/gcc.c
 +++ b/gcc/gcc.c
-@@ -877,13 +877,23 @@ proper position among the other output files.  */
- # define ASM_DEBUG_SPEC ""
+@@ -980,13 +980,23 @@ proper position among the other output files.  */
+ # define ASM_DEBUG_OPTION_SPEC ""
  #endif
  
 +#if !defined(LINK_LIBATOMIC_SPEC) && defined(ENABLE_AUTOLINK_LIBATOMIC)
@@ -264,6 +262,3 @@ index 40e07354b3d..81bd50b4d7c 100644
  #endif
  
  #ifdef ENABLE_DEFAULT_SSP
--- 
-2.31.1
-
