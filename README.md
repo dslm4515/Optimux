@@ -37,7 +37,7 @@ LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 <li> [x] Build GCC with Graphite </li>
 <li> [x] Build GCC with LTO(full) support </li>
 <li> [x] Build rootfs with LTO and optimizing flags </li>
-<li> [ ] Clean up patches for GCC-11.2 </li>
+<li> [X] Clean up patches for GCC-11.2 </li>
 <li> [ ] Add autotools (automake, autoconf) to tools </li>
 <li> [ ] Add script to check build requirements </li>
 <li> [ ] Update initramfs to use binaries from s6-portable-utils </li>
@@ -72,4 +72,4 @@ LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 
 ### Issues
 
-Built system will not allow any logins. This was caused by a broken Shadow-4.9 build. Using shadow-4.8 build from MLFS for now.
+~~Built system will not allow any logins. This was caused by a broken Shadow-4.9 build. Using shadow-4.8 build from MLFS for now.~~
