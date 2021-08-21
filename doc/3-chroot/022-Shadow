@@ -1,9 +1,5 @@
 # Final System: Shadow
 # This section is done in Chroot environment
-# **********************************************************************************
-# Build is broken and will cause built rootfs to refuse to login any account on boot
-# **********************************************************************************
-# Use shadow-4.8 for now
 
 # Optimize build with LTO
 export  CFLAGS="-march=native -mtune=native -O3 -g -pipe -fno-semantic-interposition "
@@ -22,12 +18,9 @@ find man -name Makefile.in -exec sed -i 's/passwd\.5 / /'   {} \;
 # also allows passwords longer than 8 characters. It is also 
 # necessary to change the obsolete /var/spool/mail location for 
 # user mailboxes that Shadow uses by default to the /var/mail 
-# location used currently. Get rid of /bin and /sbin from PATH, 
-# since they are simply symlinks to their counterpart in /usr
-sed -e 's:#ENCRYPT_METHOD DES:ENCRYPT_METHOD SHA512:' \
-    -e 's:/var/spool/mail:/var/mail:'                 \
-    -e '/PATH=/{s@/sbin:@@;s@/bin:@@}'                \
-    -i etc/login.defs
+# location used currently.
+sed -i -e 's@#ENCRYPT_METHOD DES@ENCRYPT_METHOD SHA512@' \
+       -e 's@/var/spool/mail@/var/mail@' etc/login.defs
 
 # Fix a simple programming error
 sed -e "224s/rounds/min_rounds/" -i libmisc/salt.c
@@ -55,8 +48,12 @@ make exec_prefix=/usr install
 mkdir -pv /BUILD/etc/default
 useradd -D --gid 999
 
-# Move misplaced binary
-mv -v /usr/bin/passwd /bin/ 
+# Move misplaced binaries
+for b in passwd login su
+do
+  mv -v /usr/bin/$b /bin/
+done
+mv -v /usr/sbin/nologin /sbin/
 
 # Disable mailbox files
 sed -i 's/yes/no/' /etc/default/useradd 
