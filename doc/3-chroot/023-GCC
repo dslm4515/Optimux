@@ -7,7 +7,6 @@ mv -v isl-0.23 isl
 
 # Apply patches from Alpine Linux
 for p in 0001-posix_memalign \
-  0002-gcc-poison-system-directories \
   0003-Turn-on-Wl-z-relro-z-now-by-default  \
   0004-Turn-on-D_FORTIFY_SOURCE-2-by-default-for-C-C-ObjC-O \
   0006-Enable-Wformat-and-Wformat-security-by-default \
