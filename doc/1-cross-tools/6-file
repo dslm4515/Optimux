@@ -16,7 +16,9 @@ AS="${OML_TARGET}-as"          \
 RANLIB="${OML_TARGET}-ranlib"  \
 LD="${OML_TARGET}-ld"          \
 STRIP="${OML_TARGET}-strip"    \
-./configure --prefix=/cross-tools --disable-libseccomp
+./configure --host=$OML_TARGET \
+--prefix=/cross-tools \
+--disable-libseccomp
 
 # Build and install
 make && make install
