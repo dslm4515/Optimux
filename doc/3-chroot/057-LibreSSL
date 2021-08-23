@@ -4,32 +4,35 @@
 # Re-create configure script
 autoreconf -vif
 
-# Optimize with LTO and PGO
+# Optimize without LTO and PGO
 # Using flags from Clear Linux's OpenSSL build
 # May need to research more on PGO builds... as
 # libressl may have not been built with PGO
 export  CFLAGS="-march=native -mtune=native "
-export CFLAGS+="-flto=4 -ffunction-sections -fsemantic-interposition -O3 "
+#export CFLAGS+="-flto=4 -ffunction-sections -fsemantic-interposition -O3 "
+export CFLAGS+="-ffunction-sections -fsemantic-interposition -O3 "
 export CFLAGS+="-falign-functions=32 -falign-loops=32 "
-export CXXFLAGS="$CFLAGS"
-export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
-export CXXFLAGS="$CXXFLAGS -flto=4 -ffunction-sections -fsemantic-interposition -O3 "
-export CXXFLAGS="$CXXFLAGS -flto=4 -fsemantic-interposition -O3 -falign-functions=32  "
-export CFLAGS_GENERATE="$CFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
-export FCFLAGS_GENERATE="$FCFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
-export FFLAGS_GENERATE="$FFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
-export CXXFLAGS_GENERATE="$CXXFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
-export CFLAGS_USE="$CFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
-export FCFLAGS_USE="$FCFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
-export FFLAGS_USE="$FFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
-export CXXFLAGS_USE="$CXXFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
+#export CXXFLAGS="$CFLAGS"
+#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+#export CXXFLAGS="$CXXFLAGS -flto=4 -ffunction-sections -fsemantic-interposition -O3 "
+#export CXXFLAGS="$CXXFLAGS -flto=4 -fsemantic-interposition -O3 -falign-functions=32  "
+#export CFLAGS_GENERATE="$CFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
+#export FCFLAGS_GENERATE="$FCFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
+#export FFLAGS_GENERATE="$FFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
+#export CXXFLAGS_GENERATE="$CXXFLAGS -fprofile-generate -fprofile-dir=/tmp/pgo "
+#export CFLAGS_USE="$CFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
+#export FCFLAGS_USE="$FCFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
+#export FFLAGS_USE="$FFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
+#export CXXFLAGS_USE="$CXXFLAGS -fprofile-use -fprofile-dir=/tmp/pgo -fprofile-correction "
 
 # Configure source
-CFLAGS="${CFLAGS_GENERATE} -L/usr/lib " \
-CXXFLAGS="${CXXFLAGS_GENERATE} -L/usr/lib  " \
-LDFLAGS="-flto=4 $LDFLAGS" \
-FFLAGS="${FFLAGS_GENERATE}" \
-FCFLAGS="${FCFLAGS_GENERATE}" \
+#CFLAGS="${CFLAGS_GENERATE} -L/usr/lib " \
+#CXXFLAGS="${CXXFLAGS_GENERATE} -L/usr/lib  " \
+#LDFLAGS="-flto=4 $LDFLAGS" \
+#FFLAGS="${FFLAGS_GENERATE}" \
+#FCFLAGS="${FCFLAGS_GENERATE}" \
+CFLAGS="${CFLAGS} -L/usr/lib " \
+CXXFLAGS="${CFLAGS} -L/usr/lib " \
 ./configure \
            --build=${TRUPLE} \
            --host=${TRUPLE} \
@@ -44,6 +47,7 @@ make
 # Install
 make install
 
-unset CFLAGS CXXFLAGS LDFLAGS CFLAGS_GENERATE FCFLAGS_GENERATE 
-unset FFLAGS_GENERATE CXXFLAGS_GENERATE CFLAGS_USE 
-unset FCFLAGS_USE FFLAGS_USE CXXFLAGS_USE
+#unset CFLAGS CXXFLAGS LDFLAGS CFLAGS_GENERATE FCFLAGS_GENERATE 
+#unset FFLAGS_GENERATE CXXFLAGS_GENERATE CFLAGS_USE 
+#unset FCFLAGS_USE FFLAGS_USE CXXFLAGS_USE
+unset CFLAGS
