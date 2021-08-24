@@ -76,7 +76,6 @@ export XCONFIG="--with-ppl=yes --with-cloog=yes "
 
 # Optimize build... for ivybridge CPUs (change -march to match target CPU)
 export   CFLAGS="-march=ivybridge -g1 -O3 -fstack-protector "
-export  CFLAGS+="-Wl,-z -Wl,now -Wl,-z -Wl,relro  "
 export  CFLAGS+="-Wl,-z,max-page-size=0x1000 "
 export CXXFLAGS="-march=ivybridge -g -O3  -Wl,-z,max-page-size=0x1000"
 export CFLAGS_FOR_TARGET="$CFLAGS -march=ivybridge -fno-semantic-interposition "
