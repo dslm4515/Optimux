@@ -46,10 +46,6 @@ do
   patch -Np1 -i ../patches/gcc-alpine/$p.patch
 done
 
-# Make sure GCC installs libraries in /usr/lib and not /usr/lib64
-sed -e '/m64=/s/lib64/lib/' \
-    -i.orig gcc/config/i386/t-linux64
-
 # Build in a dedicated directory
 mkdir -v build && cd build
 
