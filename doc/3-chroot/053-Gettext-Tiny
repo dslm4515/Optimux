@@ -8,7 +8,7 @@ patch -Np1 -i ../patches/gettext-tiny-adiele/stop-doing-macro-crap.patch
 
 # Optimize with LTO
 export  CFLAGS="-march=native -mtune=native -pipe "
-export CFLAGS+="-O3 -fdata-sections -ffunction-sections "
+export CFLAGS+="-fdata-sections -ffunction-sections "
 export CFLAGS+="-fno-semantic-interposition "
 export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
 
