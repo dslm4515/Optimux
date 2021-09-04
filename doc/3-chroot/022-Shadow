@@ -8,7 +8,7 @@ export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
 
 # Disable the installation of the groups program and its man pages, 
 # as Coreutils provides a better version. Also, prevent the 
-# installation of manual pages that were already
+# installation of manual pages that were already installed with man-pages
 sed -i 's/groups$(EXEEXT) //' src/Makefile.in                      &&
 find man -name Makefile.in -exec sed -i 's/groups\.1 / /'   {} \;  &&
 find man -name Makefile.in -exec sed -i 's/getspnam\.3 / /' {} \;  &&
@@ -45,7 +45,7 @@ make
 
 # Install
 make exec_prefix=/usr install
-mkdir -pv /BUILD/etc/default
+mkdir -pv /etc/default
 useradd -D --gid 999
 
 # Move misplaced binaries
