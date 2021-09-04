@@ -63,19 +63,28 @@ export NOFF+="--disable-fixed-point "
 export NOFF+="--disable-sjlj-exceptions "
 export NOFF+="--disable-werror "
 
-# Enable features for x86_54
-#export XTRA86="--with-arch=x86-64 "
-export XTRA86="--with-arch=ivybridge "
-
 # Enable graphite
 export XCONFIG="--with-ppl=yes --with-cloog=yes "
 
-# Optimize build... for ivybridge CPUs (change -march to match target CPU)
-export   CFLAGS="-march=ivybridge -g1 -O3 -fstack-protector "
+# Choose a microarchitecture that matches the target CPU:
+# For Intel:
+# skylake, ivybridge, haswell, sandybridge, nehalem, westmere
+# For AMD
+# znver1, znver2, znver3, bdver3, btver2, bdver2, bdver1, btver1, amdfam10
+# For more info, go to:
+# https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html
+export cma="ivybridge"
+
+# Enable features for x86_54
+#export XTRA86="--with-arch=x86-64 "
+export XTRA86="--with-arch=${cma} "
+
+# Optimize build.
+export   CFLAGS="-march=${cma} -g1 -O3 -fstack-protector "
 export  CFLAGS+="-Wl,-z,max-page-size=0x1000 "
-export CXXFLAGS="-march=ivybridge -g -O3  -Wl,-z,max-page-size=0x1000"
-export CFLAGS_FOR_TARGET="$CFLAGS -march=ivybridge -fno-semantic-interposition "
-export CXXFLAGS_FOR_TARGET="$CXXFLAGS -march=ivybridge -fno-semantic-interposition "
+export CXXFLAGS="-march=${cma} -g -O3  -Wl,-z,max-page-size=0x1000"
+export CFLAGS_FOR_TARGET="$CFLAGS -march=${cma} -fno-semantic-interposition "
+export CXXFLAGS_FOR_TARGET="$CXXFLAGS -march=${cma} -fno-semantic-interposition "
 
 # Cannot build GCC with CFLAGS, CXXFLAGS and LDFLAGS set with configure:
 # configure: error: *** A compiler with support for C++11 language features is required.
@@ -108,7 +117,7 @@ SED=sed  libat_cv_have_ifunc=no       \
              --enable-__cxa_atexit  \
              --enable-lto \
              --enable-plugins \
-             --with-pkgversion="Optimux-Ivybridge 1.0" \
+             --with-pkgversion="Optimux-${cma} 1.0" \
              $NOFF $XTRA86 $XCONFIG
 
 # Build
