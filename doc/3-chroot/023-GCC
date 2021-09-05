@@ -179,7 +179,10 @@ grep -B2 '^ /usr/lib/gcc' dummy.log
 # /usr/local/include
 # /usr/include
 # /usr/lib/gcc/$ARCH-linux-musl/11.2.0/include
-grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
+# Since gold linker is the system default, the grep command below
+# will output nothing. SEARCH_DIR is either not used by gold linker
+# or gold linker does not output it when logged
+# grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g'
 # Should output:
 # SEARCH_DIR("/usr/$ARCH-pc-linux-musl/lib64")
 # SEARCH_DIR("/usr/local/lib64")
