@@ -62,7 +62,7 @@ make
 # Install both wide & non-wide libraries
 cd ..
 make -C build install
-make _C build-wide install
+make -C build-wide install
 
 # Move misplaced libraries
 mv -v /usr/lib/libncursesw.so.6* /lib
