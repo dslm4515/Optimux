@@ -7,4 +7,4 @@ AR="${OML_TARGET}-ar" \
 RANLIB="${OML_TARGET}-ranlib" make LIBINTL=MUSL prefix=/tools
 
 # Install only what is needed
-cp -v msgfmt msgmerge xgettext /tools/bin
+cp -v msgfmt msgmerge xgettext autopoint /tools/bin

@@ -10,7 +10,7 @@ patch -Np1 -i ../patches/xz-clear/speedup.patch
 # PGO build fails without running autoreconf first. But autopoint
 # is required. May need to include autopoint from gettext-tiny in /tools.
 # For now, apply this patch to patch in the changes done by autoreconf 
-patch -Np1 -i ../patches/xz-mlfs/update-configure-scripts.patch
+#patch -Np1 -i ../patches/xz-mlfs/update-configure-scripts.patch
 
 # Optimize with LTO
 export  CFLAGS="-march=native -mtune=native -pipe "
