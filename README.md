@@ -38,7 +38,7 @@ LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 <li> [x] Build GCC with LTO(full) support </li>
 <li> [x] Build rootfs with LTO and optimizing flags </li>
 <li> [X] Clean up patches for GCC-11.2 </li>
-<li> [ ] Add autotools (automake, autoconf) to tools </li>
+<li> [ ] Merge bin, sbin, and lib </li>
 <li> [ ] Add script to check build requirements </li>
 <li> [ ] Update initramfs to use binaries from s6-portable-utils </li>
 <lI> [ ] Port to aarch64 (64-bit ARM) </li>
