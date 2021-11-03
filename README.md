@@ -31,7 +31,7 @@ CXXFLAGS=$CFLAGS
 LDFLAGS="-flto -Wl,-O2 -Wl,--as-needed
 ```
 
-To see what to set for march and mtune, run the following on the traget machine:
+To see what to set for march and mtune, run the following on the target machine:
 ```
 gcc -march=native -Q --help=target | grep march | sed '2d' && \
 gcc -march=native -Q --help=target | grep mtune | sed '1d' | sed '2d'
