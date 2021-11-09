@@ -9,8 +9,8 @@ esac
 # Optimize build with some flags.
 export  CFLAGS="-march=native -pipe -O3 -fno-semantic-interposition "
 export CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
-export CFLAGS+="-fzero-call-used-regs=used"
-#export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used"
+export CFLAGS+="-fzero-call-used-regs=used "
+export CFLAGS+="-ffat-lto-objects -fzero-call-used-regs=used "
 export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
 
 # Enable LTO and gold linker
@@ -20,7 +20,7 @@ export XTRA="--enable-lto --enable-plugins --enable-gold "
 mkdir -v build && cd build
 
 # Configure source
-# Cannot use, LTO, as cross-tools has empty lto1 binary
+# Cannot use, LTO, if cross-tools has empty lto1 binary
 CC="${OML_TARGET}-gcc" \
 CXX="${OML_TARGET}-g++" \
 AR="${OML_TARGET}-ar" \
