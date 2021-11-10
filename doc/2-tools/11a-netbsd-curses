@@ -1,0 +1,20 @@
+# Tool Chain: netbsd curses
+# Build and install as oml
+
+# There is no configure script.
+
+# Build
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+PREFIX=/tools \
+make all
+
+
+# Install to toolchain
+make PREFIX=/tools all install
+
