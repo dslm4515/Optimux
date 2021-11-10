@@ -15,8 +15,8 @@ xz -cd ../pkgs/gmp-6.2.1.tar.xz | tar -xf -
 mv -v gmp-6.2.1 gmp
 gunzip -cd ../pkgs/mpc-1.2.1.tar.gz | tar -xf -
 mv -v mpc-1.2.1 mpc
-tar xf ../pkgs/isl-0.23.tar.bz2
-mv -v isl-0.23 isl
+tar xf ../pkgs/isl-0.24.tar.xz
+mv -v isl-0.24 isl
 
 # The target build is finding the host libstdc++'s <fenv.h>, fix it
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100017#c7
