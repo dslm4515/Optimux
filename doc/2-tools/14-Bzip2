@@ -1,25 +1,37 @@
 # Tool Chain: Bzip2
 # Build and install as oml
 
-# Fix the Makefiles for  ensures installation of symbolic 
-# links are relative and the man pages are installed into 
-# the correct location:
-cp Makefile{,.orig}
-sed -e "/^all:/s/ test//" Makefile.orig > Makefile
-sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
-sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+# Autotoolsize source so that there
+# is a configure script.
+patch -Np1 -i ../patches/bzip2-clear/0001-Autotoolize-bzip2.patch 
+patch -Np1 -i ../patches/bzip2-clear/0002-Improve-file-access.patch
 
-# Prepare source
-make -f Makefile-libbz2_so \
-        CC="${OML_TARGET}-gcc" \
-        AR="${OML_TARGET}-ar" \
-        RANLIB="${OML_TARGET}-ranlib"
-make clean
+# Regenerate configure script
+autoreconf -vfi
+
+# Configure source.
+# Without ac_cv_func_malloc_0_nonnull=yes, build fails due to
+# bzip2.o: undefined reference to `rpl_malloc'
+ac_cv_func_malloc_0_nonnull=yes \
+CC="${OML_TARGET}-gcc" \
+CXX="${OML_TARGET}-g++" \
+AR="${OML_TARGET}-ar" \
+AS="${OML_TARGET}-as" \
+RANLIB="${OML_TARGET}-ranlib" \
+LD="${OML_TARGET}-ld" \
+STRIP="${OML_TARGET}-strip" \
+./configure --build=${OML_HOST} \
+            --host=${OML_TARGET} \
+            --prefix=/tools 
 
 # Build
-make CC="${OML_TARGET}-gcc" \
-     AR="${OML_TARGET}-ar"  \
-     RANLIB="${OML_TARGET}-ranlib"
+make
 
-# Install to tool chain
-make PREFIX=/tools install
+# Install
+make install
+
+# Fix version and links
+mv -v /tools/lib/libbz2.so.1.0.0 /tools/lib/libbz2.so.1.0.8
+rm -v /tools/lib/libbz2.so{,.1}
+ln -sv libbz2.so.1.0.8 /tools/lib/libbz2.so
+ln -sv libbz2.so.1.0.8 /tools/lib/libbz2.so.1
