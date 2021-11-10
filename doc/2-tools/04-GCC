@@ -2,11 +2,11 @@
 # Build and install as oml
 
 # Optimize build with some flags.
-#export   CFLAGS="-march=native -pipe -fno-semantic-interposition "
-#export  CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
-#export  CFLAGS+="-fzero-call-used-regs=used"
-#export CFLAGS="-march=native -pipe -fno-semantic-interposition "
-#export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
+export   CFLAGS="-march=native -pipe -fno-semantic-interposition "
+export  CFLAGS+="-falign-functions=32 -flimit-function-alignment -malign-data=cacheline "
+export  CFLAGS+="-fzero-call-used-regs=used"
+export CFLAGS="-march=native -pipe -fno-semantic-interposition "
+export LDFLAGS="-Wl,-O2 -Wl,--as-needed "
 
 # Additional sources to add as GCC requires them 
 xz -cd ../pkgs/mpfr-4.1.0.tar.xz | tar -xf -
@@ -112,10 +112,8 @@ export GON="--with-ppl --with-cloog "
 export XTRA="--enable-lto "
 
 # Configure source
-#CFLAGS="-g0 -O0 $CFLAGS" \
-#CXXFLAGS="-g0 -O0 CFLAGS" \
-CFLAGS="-g0 -O0 " \
-CXXFLAGS="-g0 -O0 " \
+CFLAGS="-g0 -O0 $CFLAGS" \
+CXXFLAGS="-g0 -O0 $CFLAGS" \
 CC="${OML_TARGET}-gcc" \
 CXX="${OML_TARGET}-g++" \
 AR="${OML_TARGET}-ar" \
