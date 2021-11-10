@@ -2,9 +2,10 @@
 # Build and install as oml
 
 # Re-create configure script
-autoreconf -vif
+#autoreconf -vif
+# Usually fails
 
-patch -Np1 -i ../patches/coreutils-alpine/ls.patch
+#patch -Np1 -i ../patches/coreutils-alpine/ls.patch
 
 # Cross Compiling the configure script 
 # does not does not determine the correct 
