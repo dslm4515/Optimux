@@ -22,9 +22,9 @@ c28f119f405a2304ff0a7ccdcc629713  bison-3.8.2.tar.xz
 0d79ae8a6124546e3b94171375e5e5d0  coreutils-9.0.tar.xz
 6a6b0fdc72acfe3f2829aab477876fbc  diffutils-3.8.tar.xz
 eeefe2e6380931a77dfa6d9350b43186  findutils-4.8.0.tar.xz
-8470c34eeecc41c1aa0c5d89e630df50  gawk-5.1.0.tar.xz
+83650aa943ff2fd519b2abedf8506ace  gawk-5.1.1.tar.xz
 9ddf4d35636fa3beacd3627cc02723ff  gettext-tiny-0.3.2.tar.xz
-f47fe27049510b2249dba7f862ac1b51  grep-3.6.tar.xz
+7c9cca97fa18670a21e72638c3e1dabf  grep-3.7.tar.xz
 691b1221694c3394f1c537df4eee39d3  gzip-1.10.tar.xz
 fc7a67ea86ace13195b0bce683fd4469  make-4.3.tar.gz
 78ad9937e4caadcba1526ef1853730d5  patch-2.7.6.tar.xz
